@@ -1,18 +1,26 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, useWindowDimensions, Platform } from 'react-native';
 
 export default function AbuelitoCard({ item, onSelect }) {
-  const metaMensual = 120;
-  const saldoActual = parseFloat(item.saldo_disponible || 50);
-  const porcentaje = Math.min(100, Math.round((saldoActual / metaMensual) * 100));
+  const { width } = useWindowDimensions();
+  const esMovil = width <= 768;
+
+  // 1. DNI PROTEGIDO CON ASTERISCOS (Solo muestra los 3 últimos dígitos)
+  const dniProtegido = item.dni && item.dni.length >= 4 
+    ? `•••••${item.dni.slice(-3)}` 
+    : '••••••••';
+
+  // 2. META MENSUAL QUE SE REINICIA SOLA
+  const metaMensual = parseFloat(item.meta_mensual || 120);
+  const recaudadoMes = parseFloat(item.recaudado_mes_actual || item.saldo_disponible || 0);
+  const porcentaje = Math.min(100, Math.round((recaudadoMes / metaMensual) * 100));
 
   return (
     <TouchableOpacity 
-      style={styles.gridCard} 
+      style={[styles.gridCard, esMovil && styles.cardMovil]} 
       onPress={() => onSelect(item)} 
       activeOpacity={0.9}
     >
-      {/* FOTO CON ENCUADRE FORZADO EN LA CABEZA Y CARA */}
       <View style={styles.imageWrapper}>
         {Platform.OS === 'web' ? (
           <img 
@@ -30,9 +38,8 @@ export default function AbuelitoCard({ item, onSelect }) {
           <Image source={{ uri: item.foto_url }} style={styles.gridCardImage} />
         )}
         
-        {/* PASTILLA DE UBICACIÓN COMPACTA (SIN ALARGARSE) */}
         <View style={styles.locationBadge}>
-          <Text style={styles.locationBadgeText}>📍 {item.caserio}, {item.provincia}</Text>
+          <Text style={styles.locationBadgeText} numberOfLines={1}>📍 {item.caserio}, {item.provincia}</Text>
         </View>
 
         <View style={styles.urgenteBadge}>
@@ -42,31 +49,33 @@ export default function AbuelitoCard({ item, onSelect }) {
 
       <View style={styles.gridCardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>{item.nombre_completo}</Text>
-        <Text style={styles.cardAge}>Edad: {item.edad} años | DNI: {item.dni}</Text>
+        
+        {/* DNI CENSURADO POR SEGURIDAD */}
+        <Text style={styles.cardAge}>Edad: {item.edad} años | DNI: {dniProtegido}</Text>
 
         <Text style={styles.cardStory} numberOfLines={2}>
           {item.dolencias_salud || item.historia_biografia}
         </Text>
 
-        {/* TERMÓMETRO */}
+        {/* BARRA DE APOYO DEL MES ACTUAL */}
         <View style={styles.progressContainer}>
           <View style={styles.progressHead}>
-            <Text style={styles.progressLabel}>Meta Mensual:</Text>
-            <Text style={styles.progressValue}>S/ {saldoActual} de S/ {metaMensual}</Text>
+            <Text style={styles.progressLabel}>Canasta de este Mes:</Text>
+            <Text style={styles.progressValue}>S/ {recaudadoMes.toFixed(0)} de S/ {metaMensual.toFixed(0)}</Text>
           </View>
           <View style={styles.progressBarBg}>
             <View style={[styles.progressBarFill, { width: `${porcentaje}%` }]} />
           </View>
-          <Text style={styles.progressPct}>{porcentaje}% cubierto</Text>
+          <Text style={styles.progressPct}>
+            {porcentaje >= 100 ? '🎉 100% Cubierto este mes' : `${porcentaje}% cubierto`}
+          </Text>
         </View>
 
-        {/* VALIDACIÓN */}
         <View style={styles.verifiedRow}>
           <Text style={styles.verifiedCheck}>✓</Text>
           <Text style={styles.verifiedText} numberOfLines={1}>Validado por {item.autoridad_cargo || 'Autoridad Comunal'}</Text>
         </View>
 
-        {/* BOTÓN */}
         <View style={styles.btnDonar}>
           <Text style={styles.btnDonarText}>❤️ Ver Ficha & Donar</Text>
         </View>
@@ -88,7 +97,13 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
     margin: 8,
-    cursor: 'pointer',
+  },
+  cardMovil: {
+    width: '100%',
+    maxWidth: 400,
+    alignSelf: 'center',
+    marginHorizontal: 0,
+    marginBottom: 16,
   },
   imageWrapper: {
     position: 'relative',

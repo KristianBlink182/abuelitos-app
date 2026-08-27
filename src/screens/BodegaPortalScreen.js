@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { getAbuelitosBodega, entregarCanastaBodega } from '../services/api';
+import { loginBodega, getAbuelitosBodega, entregarCanastaBodega } from '../services/api';
 
 export default function BodegaPortalScreen() {
-  const [telefono, setTelefono] = useState('984765432');
+  const [usuarioInput, setUsuarioInput] = useState('bodega_huayllay');
+  const [passwordInput, setPasswordInput] = useState('123');
+  const [bodegaActiva, setBodegaActiva] = useState(null);
   const [abuelitos, setAbuelitos] = useState([]);
-  const [logeado, setLogeado] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Entrega
@@ -16,12 +17,27 @@ export default function BodegaPortalScreen() {
   const [foto, setFoto] = useState(null);
   const [desc, setDesc] = useState('Arroz, avena, aceite, menestras y azúcar.');
 
-  const consultarCasos = async () => {
-    if (!telefono) return;
+  const handleLogin = async () => {
+    if (!usuarioInput || !passwordInput) {
+      alert('Ingresa tu usuario y contraseña.');
+      return;
+    }
+    setLoading(true);
+    const res = await loginBodega({ usuario: usuarioInput, password: passwordInput });
+    setLoading(false);
+
+    if (res.success) {
+      setBodegaActiva(res.bodega);
+      cargarCasos(res.bodega.telefono_yape_plin);
+    } else {
+      alert(res.error || 'Credenciales incorrectas.');
+    }
+  };
+
+  const cargarCasos = async (telefono) => {
     setLoading(true);
     const data = await getAbuelitosBodega(telefono);
     setAbuelitos(data);
-    setLogeado(true);
     setLoading(false);
   };
 
@@ -53,7 +69,7 @@ export default function BodegaPortalScreen() {
       alert(`✅ Canasta entregada con éxito.\nSe descontaron S/ ${monto} del saldo de ${selectedAbuelito.nombre_completo}.`);
       setSelectedAbuelito(null);
       setFoto(null);
-      consultarCasos();
+      cargarCasos(bodegaActiva.telefono_yape_plin);
     } else {
       alert('❌ Error al registrar entrega.');
     }
@@ -63,21 +79,41 @@ export default function BodegaPortalScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.wrapper}>
         <Text style={styles.title}>🏪 Portal de la Bodega Solidaria</Text>
-        <Text style={styles.sub}>Gestiona las canastas de alimentos de tus abuelitos asignados y descuenta sus saldos con fotos de entrega.</Text>
+        <Text style={styles.sub}>Punto oficial de despacho de alimentos con fiscalización comunal.</Text>
 
-        {!logeado ? (
+        {!bodegaActiva ? (
           <View style={styles.loginCard}>
-            <Text style={styles.label}>Ingresa el Número Yape/Plin de tu Bodega:</Text>
-            <TextInput style={styles.input} keyboardType="phone-pad" value={telefono} onChangeText={setTelefono} />
-            <TouchableOpacity style={styles.btnLogin} onPress={consultarCasos} disabled={loading}>
-              {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnLoginText}>Acceder a Mis Abuelitos</Text>}
+            <Text style={styles.loginTitle}>Ingreso Exclusivo para Comerciantes</Text>
+            <Text style={styles.loginSub}>Ingresa con el usuario y contraseña asignados por la administración de abuelitos.pe</Text>
+
+            <Text style={styles.label}>Usuario de Bodega:</Text>
+            <TextInput style={styles.input} autoCapitalize="none" value={usuarioInput} onChangeText={setUsuarioInput} />
+
+            <Text style={styles.label}>Contraseña:</Text>
+            <TextInput style={styles.input} secureTextEntry value={passwordInput} onChangeText={setPasswordInput} />
+
+            <TouchableOpacity style={styles.btnLogin} onPress={handleLogin} disabled={loading}>
+              {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnLoginText}>Acceder al Portal</Text>}
             </TouchableOpacity>
           </View>
         ) : (
           <View>
-            <Text style={styles.secTitle}>Abuelitos asignados a tu tienda:</Text>
+            {/* CABECERA BODEGA */}
+            <View style={styles.bodegaHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.bName}>🏪 {bodegaActiva.nombre_comercio}</Text>
+                <Text style={styles.bLoc}>📍 {bodegaActiva.caserio_comunidad} ({bodegaActiva.distrito})</Text>
+                <Text style={styles.bYape}>📱 Yape/Plin: {bodegaActiva.telefono_yape_plin}</Text>
+              </View>
+              <TouchableOpacity style={styles.btnLogout} onPress={() => setBodegaActiva(null)}>
+                <Text style={styles.btnLogoutText}>Salir</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.secTitle}>Abuelitos Asignados a tu Tienda ({abuelitos.length}):</Text>
+
             {abuelitos.length === 0 ? (
-              <Text style={{ textAlign: 'center', color: '#64748B', marginVertical: 20 }}>No tienes abuelitos registrados aún.</Text>
+              <View style={styles.emptyCard}><Text style={{ color: '#64748B' }}>No tienes abuelitos asignados en este momento.</Text></View>
             ) : (
               <View style={styles.grid}>
                 {abuelitos.map((a) => (
@@ -86,7 +122,9 @@ export default function BodegaPortalScreen() {
                     <View style={{ flex: 1 }}>
                       <Text style={styles.aName}>{a.nombre_completo}</Text>
                       <Text style={styles.aLoc}>📍 {a.caserio}</Text>
-                      <Text style={styles.aSaldo}>💰 Saldo en Alimentos: <Text style={{ color: '#16A34A', fontWeight: '900' }}>S/ {parseFloat(a.saldo_disponible || 0).toFixed(2)}</Text></Text>
+                      <Text style={styles.aSaldo}>
+                        🛒 Saldo Disponible: <Text style={{ color: '#16A34A', fontWeight: '900', fontSize: 16 }}>S/ {parseFloat(a.saldo_disponible || 0).toFixed(2)}</Text>
+                      </Text>
                       
                       <TouchableOpacity style={styles.btnDespachar} onPress={() => setSelectedAbuelito(a)}>
                         <Text style={styles.btnDespacharText}>📦 Entregar Canasta</Text>
@@ -97,10 +135,10 @@ export default function BodegaPortalScreen() {
               </View>
             )}
 
-            {/* FORMULARIO DE DESPACHO */}
+            {/* MODAL DE ENTREGA */}
             {selectedAbuelito && (
               <View style={styles.despachoCard}>
-                <Text style={styles.despachoTitle}>📦 Entregar Productos a {selectedAbuelito.nombre_completo}</Text>
+                <Text style={styles.despachoTitle}>📦 Despachar Canasta a {selectedAbuelito.nombre_completo}</Text>
                 
                 <Text style={styles.label}>Selecciona el Pack de Canasta:</Text>
                 <View style={styles.packRow}>
@@ -114,7 +152,7 @@ export default function BodegaPortalScreen() {
 
                 <Text style={styles.label}>Foto de la entrega con el abuelito *:</Text>
                 <TouchableOpacity style={styles.btnFoto} onPress={pickImage}>
-                  <Text style={styles.btnFotoText}>{foto ? '✓ Foto Lista' : '📷 Tomar Foto de la Entrega'}</Text>
+                  <Text style={styles.btnFotoText}>{foto ? '✓ Foto de Constancia Lista' : '📷 Tomar Foto de la Entrega'}</Text>
                 </TouchableOpacity>
                 {foto && <Image source={{ uri: foto.uri }} style={styles.preview} />}
 
@@ -138,30 +176,39 @@ const styles = StyleSheet.create({
   wrapper: { maxWidth: 800, alignSelf: 'center', width: '100%' },
   title: { fontSize: 24, fontWeight: '900', color: '#1E293B', textAlign: 'center', marginBottom: 4 },
   sub: { fontSize: 13, color: '#64748B', textAlign: 'center', marginBottom: 24 },
-  loginCard: { backgroundColor: '#FFF', padding: 24, borderRadius: 16, borderWidth: 1, borderColor: '#E2E8F0', maxWidth: 400, alignSelf: 'center', width: '100%' },
-  label: { fontSize: 13, fontWeight: 'bold', color: '#334155', marginBottom: 6, marginTop: 10 },
-  input: { borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
-  btnLogin: { backgroundColor: '#FF385C', paddingVertical: 14, borderRadius: 10, alignItems: 'center', marginTop: 16 },
+  loginCard: { backgroundColor: '#FFF', padding: 24, borderRadius: 16, borderWidth: 1, borderColor: '#E2E8F0', maxWidth: 420, alignSelf: 'center', width: '100%' },
+  loginTitle: { fontSize: 16, fontWeight: 'bold', color: '#1E293B', marginBottom: 4, textAlign: 'center' },
+  loginSub: { fontSize: 12, color: '#64748B', marginBottom: 16, textAlign: 'center' },
+  label: { fontSize: 12, fontWeight: 'bold', color: '#334155', marginBottom: 4, marginTop: 10 },
+  input: { borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 9, fontSize: 13 },
+  btnLogin: { backgroundColor: '#FF385C', paddingVertical: 13, borderRadius: 10, alignItems: 'center', marginTop: 16 },
   btnLoginText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
-  secTitle: { fontSize: 18, fontWeight: 'bold', color: '#1E293B', marginBottom: 14 },
-  grid: { gap: 14 },
-  abuelitoCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 16, borderRadius: 14, borderWidth: 1, borderColor: '#E2E8F0', gap: 14, alignItems: 'center' },
-  avatar: { width: 80, height: 80, borderRadius: 10, resizeMode: 'cover' },
-  aName: { fontSize: 17, fontWeight: 'bold', color: '#1E293B' },
-  aLoc: { fontSize: 12, color: '#64748B', marginVertical: 2 },
-  aSaldo: { fontSize: 13, color: '#334155', marginTop: 2 },
-  btnDespachar: { backgroundColor: '#16A34A', paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, alignSelf: 'flex-start', marginTop: 8 },
-  btnDespacharText: { color: '#FFF', fontWeight: 'bold', fontSize: 12 },
+  bodegaHeader: { flexDirection: 'row', backgroundColor: '#FFF', padding: 18, borderRadius: 14, borderWidth: 1, borderColor: '#E2E8F0', alignItems: 'center', marginBottom: 20 },
+  bName: { fontSize: 18, fontWeight: 'bold', color: '#1E293B' },
+  bLoc: { fontSize: 12, color: '#64748B', marginVertical: 2 },
+  bYape: { fontSize: 13, color: '#74226C', fontWeight: 'bold' },
+  btnLogout: { backgroundColor: '#FEE2E2', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8 },
+  btnLogoutText: { fontSize: 11, fontWeight: 'bold', color: '#991B1B' },
+  secTitle: { fontSize: 17, fontWeight: 'bold', color: '#1E293B', marginBottom: 12 },
+  grid: { gap: 12 },
+  abuelitoCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: '#E2E8F0', gap: 14, alignItems: 'center' },
+  avatar: { width: 75, height: 75, borderRadius: 10, resizeMode: 'cover' },
+  aName: { fontSize: 16, fontWeight: 'bold', color: '#1E293B' },
+  aLoc: { fontSize: 11, color: '#64748B', marginVertical: 2 },
+  aSaldo: { fontSize: 12, color: '#334155', marginTop: 2 },
+  btnDespachar: { backgroundColor: '#16A34A', paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, alignSelf: 'flex-start', marginTop: 6 },
+  btnDespacharText: { color: '#FFF', fontWeight: 'bold', fontSize: 11 },
   despachoCard: { backgroundColor: '#FFF7ED', padding: 20, borderRadius: 16, borderWidth: 2, borderColor: '#EA580C', marginTop: 20 },
-  despachoTitle: { fontSize: 17, fontWeight: '900', color: '#9A3412', marginBottom: 10 },
+  despachoTitle: { fontSize: 16, fontWeight: '900', color: '#9A3412', marginBottom: 10 },
   packRow: { flexDirection: 'row', gap: 10 },
-  btnPack: { flex: 1, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#FDBA74', padding: 12, borderRadius: 8, alignItems: 'center' },
+  btnPack: { flex: 1, backgroundColor: '#FFF', borderWidth: 1, borderColor: '#FDBA74', padding: 10, borderRadius: 8, alignItems: 'center' },
   btnPackActive: { backgroundColor: '#EA580C', borderColor: '#EA580C' },
-  packText: { fontWeight: 'bold', color: '#9A3412', fontSize: 13 },
+  packText: { fontWeight: 'bold', color: '#9A3412', fontSize: 12 },
   packTextActive: { color: '#FFF' },
   btnFoto: { backgroundColor: '#FFF', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#FDBA74', borderStyle: 'dashed', alignItems: 'center', marginTop: 4 },
-  btnFotoText: { color: '#EA580C', fontWeight: 'bold', fontSize: 13 },
+  btnFotoText: { color: '#EA580C', fontWeight: 'bold', fontSize: 12 },
   preview: { width: 100, height: 100, borderRadius: 8, alignSelf: 'center', marginVertical: 8 },
-  btnConfirmarDespacho: { backgroundColor: '#EA580C', paddingVertical: 14, borderRadius: 10, alignItems: 'center', marginTop: 14 },
-  btnConfirmarDespachoText: { color: '#FFF', fontWeight: '900', fontSize: 15 }
+  btnConfirmarDespacho: { backgroundColor: '#EA580C', paddingVertical: 13, borderRadius: 10, alignItems: 'center', marginTop: 14 },
+  btnConfirmarDespachoText: { color: '#FFF', fontWeight: '900', fontSize: 14 },
+  emptyCard: { backgroundColor: '#FFF', padding: 20, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0', alignItems: 'center' }
 });

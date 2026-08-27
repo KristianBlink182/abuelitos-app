@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, useWindowDimensions } from 'react-native';
 import HeroBanner from '../components/HeroBanner';
 import DepartmentBubblesSection from '../components/DepartmentBubblesSection';
 import AbuelitoCard from '../components/AbuelitoCard';
@@ -12,6 +12,9 @@ export default function HomeScreen({
   onSelectDpto,
   onEjecutarBusqueda 
 }) {
+  const { width } = useWindowDimensions();
+  const esMovil = width <= 768;
+
   const [busqueda, setBusqueda] = useState('');
   const [dptoSeleccionado, setDptoSeleccionado] = useState('Todos');
 
@@ -39,38 +42,46 @@ export default function HomeScreen({
         onEjecutarBusqueda={onEjecutarBusqueda}
       />
 
-      {/* 2. CATÁLOGO DE CASOS CON DEGRADADO SUAVE */}
-      <View style={styles.directorySection}>
-        <View style={styles.directoryContainer}>
-          <View style={styles.dirHeadRow}>
-            <View>
-              <Text style={styles.dirTag}>CASOS SOCIALES RECIENTES</Text>
-              <Text style={styles.sectionHeading}>Adultos Mayores en Extrema Vulnerabilidad</Text>
-              <Text style={styles.sectionSubHeading}>Elige a un abuelito para apadrinar su canasta básica de víveres este mes:</Text>
-            </View>
-
-            <TouchableOpacity style={styles.btnVerTodos} onPress={onVerCatalogoCompleto} activeOpacity={0.85}>
-              <Text style={styles.btnVerTodosText}>VER TODOS →</Text>
-            </TouchableOpacity>
+      {/* 2. CATÁLOGO DE CASOS */}
+      <View style={[styles.directoryContainer, esMovil && styles.directoryContainerMovil]}>
+        
+        {/* CABECERA RESPONSIVE (NO SE CORTA EN MÓVIL) */}
+        <View style={[styles.dirHeadRow, esMovil && styles.dirHeadRowMovil]}>
+          <View style={esMovil && { alignItems: 'center', width: '100%' }}>
+            <Text style={styles.dirTag}>CASOS SOCIALES RECIENTES</Text>
+            <Text style={[styles.sectionHeading, esMovil && styles.sectionHeadingMovil]}>
+              Adultos Mayores en Extrema Vulnerabilidad
+            </Text>
+            <Text style={[styles.sectionSubHeading, esMovil && styles.sectionSubHeadingMovil]}>
+              Elige a un abuelito para apadrinar su canasta de víveres:
+            </Text>
           </View>
 
-          {loading ? (
-            <ActivityIndicator size="large" color="#FF385C" style={{ marginTop: 40 }} />
-          ) : abuelitosFiltrados.length === 0 ? (
-            <View style={styles.emptySearch}>
-              <Text style={styles.emptySearchText}>No se encontraron casos con los filtros seleccionados.</Text>
-            </View>
-          ) : (
-            <View style={styles.gridContainer}>
-              {abuelitosFiltrados.map((item) => (
-                <AbuelitoCard key={item.id} item={item} onSelect={onSelectAbuelito} />
-              ))}
-            </View>
-          )}
+          <TouchableOpacity 
+            style={[styles.btnVerTodos, esMovil && styles.btnVerTodosMovil]} 
+            onPress={onVerCatalogoCompleto} 
+            activeOpacity={0.85}
+          >
+            <Text style={styles.btnVerTodosText}>VER TODOS →</Text>
+          </TouchableOpacity>
         </View>
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#FF385C" style={{ marginTop: 40 }} />
+        ) : abuelitosFiltrados.length === 0 ? (
+          <View style={styles.emptySearch}>
+            <Text style={styles.emptySearchText}>No se encontraron casos con los filtros seleccionados.</Text>
+          </View>
+        ) : (
+          <View style={styles.gridContainer}>
+            {abuelitosFiltrados.map((item) => (
+              <AbuelitoCard key={item.id} item={item} onSelect={onSelectAbuelito} />
+            ))}
+          </View>
+        )}
       </View>
 
-      {/* 3. BURBUJAS DE DEPARTAMENTOS CON DEGRADADO */}
+      {/* 3. SECCIÓN DE REGIONES COMPACTA */}
       <DepartmentBubblesSection onSelectDpto={onSelectDpto} />
     </View>
   );
@@ -80,26 +91,30 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F8FAFC',
   },
-  directorySection: {
-    paddingVertical: 50,
-    backgroundColor: '#F8FAFC',
-    backgroundImage: Platform.OS === 'web' 
-      ? 'radial-gradient(circle at 15% 15%, rgba(255, 56, 92, 0.04) 0%, transparent 40%), radial-gradient(circle at 85% 75%, rgba(37, 99, 235, 0.04) 0%, transparent 45%), linear-gradient(180deg, #F1F5F9 0%, #FFFDF9 50%, #F8FAFC 100%)' 
-      : undefined,
-  },
   directoryContainer: {
+    paddingVertical: 40,
+    paddingHorizontal: 16,
     maxWidth: 1180,
     width: '100%',
     alignSelf: 'center',
-    paddingHorizontal: 16,
+  },
+  directoryContainerMovil: {
+    paddingVertical: 25,
+    paddingHorizontal: 12,
   },
   dirHeadRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginBottom: 25,
+    marginBottom: 20,
     flexWrap: 'wrap',
     gap: 12,
+  },
+  dirHeadRowMovil: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 10,
   },
   dirTag: {
     color: '#FF385C',
@@ -107,16 +122,26 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1.5,
     marginBottom: 3,
+    textAlign: 'center',
   },
   sectionHeading: {
     fontSize: 26,
     fontWeight: '900',
     color: '#1E293B',
   },
+  sectionHeadingMovil: {
+    fontSize: 20,
+    lineHeight: 26,
+    textAlign: 'center',
+  },
   sectionSubHeading: {
     fontSize: 13,
     color: '#64748B',
     marginTop: 4,
+  },
+  sectionSubHeadingMovil: {
+    fontSize: 12,
+    textAlign: 'center',
   },
   btnVerTodos: {
     backgroundColor: '#FFF',
@@ -129,6 +154,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
     elevation: 2,
+  },
+  btnVerTodosMovil: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginTop: 4,
   },
   btnVerTodosText: {
     color: '#FF385C',

@@ -81,16 +81,13 @@ export const updateAbuelito = async (id, formData) => {
 // MÓDULO 2: DONACIONES Y BILLETERA SOLIDARIA
 // ========================================================
 
-// 5. Registrar una donación realizada por Yape / Plin
-export const reportarDonacion = async (data) => {
+// Reportar una Donación de Yape/Plin con Comprobante
+export const reportarDonacion = async (formData) => {
   try {
     const res = await fetch(`${API_URL}/donaciones`, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json', 
-        'Bypass-Tunnel-Reminder': 'true' 
-      },
-      body: JSON.stringify(data)
+      headers: { 'Bypass-Tunnel-Reminder': 'true' }, // Sin Content-Type para permitir la subida de la foto
+      body: formData
     });
     return await res.json();
   } catch (error) {
@@ -388,6 +385,104 @@ export const loginBodega = async (data) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
       body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch (error) {
+    return { error: 'Error de conexión' };
+  }
+};
+
+export const cambiarPasswordDonante = async (usuario_id, nueva_password) => {
+  try {
+    const res = await fetch(`${API_URL}/auth/cambiar-password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+      body: JSON.stringify({ usuario_id, nueva_password })
+    });
+    return await res.json();
+  } catch (error) {
+    return { error: 'Error de conexión' };
+  }
+};
+
+export const getMisDonaciones = async (usuario_id) => {
+  try {
+    const res = await fetch(`${API_URL}/donaciones/usuario/${usuario_id}`, { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    if (res.ok) return await res.json();
+  } catch (error) {}
+  return [];
+};
+
+export const getDonacionesPendientes = async () => {
+  try {
+    const res = await fetch(`${API_URL}/admin/donaciones-pendientes`, { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    if (res.ok) return await res.json();
+  } catch (error) {}
+  return [];
+};
+
+export const validarDonacionAdmin = async (id) => {
+  try {
+    const res = await fetch(`${API_URL}/admin/donaciones/validar/${id}`, {
+      method: 'PUT',
+      headers: { 'Bypass-Tunnel-Reminder': 'true' }
+    });
+    return await res.json();
+  } catch (error) {
+    return { error: 'Error de conexión' };
+  }
+};
+
+export const rechazarDonacionAdmin = async (id) => {
+  try {
+    const res = await fetch(`${API_URL}/admin/donaciones/rechazar/${id}`, {
+      method: 'DELETE',
+      headers: { 'Bypass-Tunnel-Reminder': 'true' }
+    });
+    return await res.json();
+  } catch (error) {
+    return { error: 'Error de conexión' };
+  }
+};
+
+export const getAdminBodegas = async () => {
+  try {
+    const res = await fetch(`${API_URL}/admin/bodegas`, { headers: { 'Bypass-Tunnel-Reminder': 'true' } });
+    if (res.ok) return await res.json();
+  } catch (error) {}
+  return [];
+};
+
+export const crearBodegaAdmin = async (data) => {
+  try {
+    const res = await fetch(`${API_URL}/admin/bodegas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Bypass-Tunnel-Reminder': 'true' },
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch (error) {
+    return { error: 'Error de conexión' };
+  }
+};
+
+export const toggleEstadoBodega = async (id) => {
+  try {
+    const res = await fetch(`${API_URL}/admin/bodegas/toggle-estado/${id}`, {
+      method: 'PUT',
+      headers: { 'Bypass-Tunnel-Reminder': 'true' }
+    });
+    return await res.json();
+  } catch (error) {
+    return { error: 'Error de conexión' };
+  }
+};
+
+export const toggleEstadoAbuelito = async (id) => {
+  try {
+    const res = await fetch(`${API_URL}/admin/abuelitos/toggle-estado/${id}`, {
+      method: 'PUT',
+      headers: { 'Bypass-Tunnel-Reminder': 'true' }
     });
     return await res.json();
   } catch (error) {

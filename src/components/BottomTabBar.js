@@ -5,18 +5,18 @@ export default function BottomTabBar({ currentView, onNavigate, usuarioSesion, o
   const tabs = [
     { id: 'home', label: 'Inicio', icon: '🏠' },
     { id: 'directory_search', label: 'Explorar', icon: '🔍' },
-    { id: 'donor_profile', label: 'Favoritos', icon: '❤️' },
-    { id: 'auth_or_profile', label: usuarioSesion ? 'Mi Cuenta' : 'Ingresar', icon: '👤' },
+    { id: 'favorites', label: 'Favoritos', icon: '❤️' },
+    { id: 'account', label: usuarioSesion ? 'Mi Cuenta' : 'Ingresar', icon: '👤' },
   ];
 
   const handleTabPress = (tabId) => {
-    if (tabId === 'donor_profile' && !usuarioSesion) {
+    if (tabId === 'favorites' && !usuarioSesion) {
       onOpenAuth();
       return;
     }
-    if (tabId === 'auth_or_profile') {
+    if (tabId === 'account') {
       if (!usuarioSesion) onOpenAuth();
-      else onNavigate('donor_profile');
+      else onNavigate('account');
       return;
     }
     onNavigate(tabId);
@@ -25,7 +25,7 @@ export default function BottomTabBar({ currentView, onNavigate, usuarioSesion, o
   return (
     <View style={styles.tabBarContainer}>
       {tabs.map((tab) => {
-        const isActive = currentView === tab.id || (tab.id === 'auth_or_profile' && currentView === 'donor_profile');
+        const isActive = currentView === tab.id;
         return (
           <TouchableOpacity
             key={tab.id}
@@ -58,27 +58,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 10,
   },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-  },
-  tabIcon: {
-    fontSize: 20,
-    marginBottom: 3,
-    opacity: 0.55,
-  },
-  tabIconActive: {
-    opacity: 1,
-    transform: [{ scale: 1.15 }],
-  },
-  tabLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  tabLabelActive: {
-    color: '#FF385C',
-    fontWeight: 'bold',
-  },
+  tabItem: { alignItems: 'center', justifyContent: 'center', flex: 1 },
+  tabIcon: { fontSize: 20, marginBottom: 3, opacity: 0.55 },
+  tabIconActive: { opacity: 1, transform: [{ scale: 1.15 }] },
+  tabLabel: { fontSize: 11, fontWeight: '600', color: '#64748B' },
+  tabLabelActive: { color: '#FF385C', fontWeight: 'bold' },
 });

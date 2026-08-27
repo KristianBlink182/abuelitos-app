@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Image, Modal, ScrollView, useWindowDimensions, Platform } from 'react-native';
 import { ubigeoPeru } from '../utils/ubigeoPeru';
 import { getHeroConfig } from '../services/api';
 
@@ -9,13 +9,17 @@ export default function HeroBanner({
   totalCasos = 3,
   onEjecutarBusqueda 
 }) {
+  const { width } = useWindowDimensions();
+  const esMovil = width <= 768;
+
   const departamentosDisponibles = ['Todos', ...Object.keys(ubigeoPeru)];
+  const [modalDptoVisible, setModalDptoVisible] = useState(false);
 
   const [heroData, setHeroData] = useState({
     tagline: 'CONECTANDO CORAZONES, TRANSFORMANDO VIDAS:',
     titulo: 'Apadrina una Sonrisa en el Perú Profundo',
     foto_banner_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200',
-    color_fondo: '#1E232B'
+    color_fondo: '#0F172A'
   });
 
   useEffect(() => {
@@ -35,75 +39,107 @@ export default function HeroBanner({
     }
   };
 
+  const seleccionarDpto = (d) => {
+    setDptoSeleccionado(d);
+    setModalDptoVisible(false);
+  };
+
   return (
-    <View style={styles.heroSection}>
+    <View style={[styles.heroSection, esMovil && styles.heroSectionMovil]}>
       <View style={styles.glowRed} />
       <View style={styles.glowBlue} />
 
       <View style={styles.heroContainer}>
         
-        {/* COLUMNA IZQUIERDA: TEXTOS, BUSCADOR Y MÉTRICAS */}
-        <View style={styles.colText}>
-          <View style={styles.taglineBadge}>
+        {/* TEXTOS Y BUSCADOR */}
+        <View style={[styles.colText, esMovil && styles.colTextMovil]}>
+          <View style={[styles.taglineBadge, esMovil && styles.taglineBadgeMovil]}>
             <Text style={styles.tagline}>{heroData.tagline}</Text>
           </View>
           
-          <Text style={styles.title}>{heroData.titulo}</Text>
+          <Text style={[styles.title, esMovil && styles.titleMovil]}>{heroData.titulo}</Text>
 
-          {/* BUSCADOR */}
-          <View style={styles.searchBar}>
-            {Platform.OS === 'web' && (
-              <select 
-                style={styles.selectDpto} 
-                value={dptoSeleccionado} 
-                onChange={(e) => setDptoSeleccionado(e.target.value)}
-              >
-                {departamentosDisponibles.map((d) => (
-                  <option key={d} value={d}>{d === 'Todos' ? '📍 Todo el Perú' : `📍 ${d}`}</option>
-                ))}
-              </select>
-            )}
+          {/* BARRA DE BÚSQUEDA CON DEGRADADO CÁLIDO Y CRISTAL */}
+          <View style={[styles.searchBar, esMovil && styles.searchBarMovil]}>
+            
+            {/* SELECTOR DE DEPARTAMENTO */}
+            <TouchableOpacity 
+              style={[styles.btnSelectDpto, esMovil && styles.btnSelectDptoMovil]} 
+              onPress={() => setModalDptoVisible(true)}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.btnSelectDptoText, esMovil && { fontSize: 11 }]} numberOfLines={1}>
+                {dptoSeleccionado === 'Todos' ? '📍 Perú' : `📍 ${dptoSeleccionado}`} ▼
+              </Text>
+            </TouchableOpacity>
 
             <TextInput 
-              style={styles.inputSearch}
-              placeholder="Buscar por nombre, caserío o provincia..."
+              style={[styles.inputSearch, esMovil && styles.inputSearchMovil]}
+              placeholder={esMovil ? "Buscar abuelito..." : "Buscar por nombre, caserío o provincia..."}
               value={busqueda}
               onChangeText={setBusqueda}
               onSubmitEditing={handleBuscarClick}
             />
 
-            <TouchableOpacity style={styles.btnBuscar} activeOpacity={0.85} onPress={handleBuscarClick}>
+            <TouchableOpacity style={[styles.btnBuscar, esMovil && styles.btnBuscarMovil]} activeOpacity={0.85} onPress={handleBuscarClick}>
               <Text style={styles.btnBuscarText}>🔍 Buscar</Text>
             </TouchableOpacity>
           </View>
 
-          {/* INDICADORES FLOTANTES */}
+          {/* INDICADORES */}
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statIcon}>📍 100%</Text>
-              <Text style={styles.statText}>Ayuda Directa a los Abuelitos</Text>
+              <Text style={styles.statText}>Ayuda Directa</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statIcon}>👥 {totalCasos}</Text>
-              <Text style={styles.statText}>Casos Validados</Text>
+              <Text style={styles.statText}>Validados</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statIcon}>✓ 100%</Text>
-              <Text style={styles.statText}>Fiscalizado por Autoridades</Text>
+              <Text style={styles.statText}>Fiscalizado</Text>
             </View>
           </View>
         </View>
 
-        {/* COLUMNA DERECHA: FOTO DEL ABUELITO */}
-        <View style={styles.colImage}>
-          <View style={styles.imageGlowEffect} />
-          <Image 
-            source={{ uri: heroData.foto_banner_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200' }} 
-            style={styles.abuelitoImg} 
-          />
-        </View>
+        {/* FOTO DEL ABUELITO (SOLO EN COMPUTADORAS) */}
+        {!esMovil && (
+          <View style={styles.colImage}>
+            <Image 
+              source={{ uri: heroData.foto_banner_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200' }} 
+              style={styles.abuelitoImg} 
+            />
+          </View>
+        )}
 
       </View>
+
+      {/* MODAL DE DEPARTAMENTOS */}
+      <Modal visible={modalDptoVisible} transparent={true} animationType="fade">
+        <TouchableOpacity 
+          style={styles.modalDptoOverlay} 
+          activeOpacity={1} 
+          onPress={() => setModalDptoVisible(false)}
+        >
+          <View style={styles.modalDptoCard}>
+            <Text style={styles.modalDptoTitle}>Selecciona un Departamento</Text>
+            <ScrollView style={{ maxHeight: 350 }}>
+              {departamentosDisponibles.map((d) => (
+                <TouchableOpacity 
+                  key={d} 
+                  style={[styles.dptoOption, dptoSeleccionado === d && styles.dptoOptionActive]}
+                  onPress={() => seleccionarDpto(d)}
+                >
+                  <Text style={[styles.dptoOptionText, dptoSeleccionado === d && styles.dptoOptionTextActive]}>
+                    {d === 'Todos' ? '📍 Todo el Perú (Todos)' : `📍 ${d}`}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -115,9 +151,15 @@ const styles = StyleSheet.create({
     backgroundImage: Platform.OS === 'web' 
       ? 'radial-gradient(circle at 85% 45%, rgba(255, 56, 92, 0.18) 0%, transparent 55%), radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 60%), linear-gradient(135deg, #090D16 0%, #131B2E 50%, #0F172A 100%)'
       : undefined,
-    paddingVertical: 45,
+    paddingVertical: 40,
     paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderColor: '#1E293B',
     overflow: 'hidden',
+  },
+  heroSectionMovil: {
+    paddingVertical: 22,
+    paddingHorizontal: 16,
   },
   glowRed: {
     position: 'absolute',
@@ -152,6 +194,13 @@ const styles = StyleSheet.create({
     minWidth: 320,
     paddingRight: 20,
   },
+  colTextMovil: {
+    width: '100%',
+    minWidth: '100%',
+    paddingRight: 0,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   taglineBadge: {
     alignSelf: 'flex-start',
     backgroundColor: 'rgba(255, 56, 92, 0.12)',
@@ -162,78 +211,109 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 56, 92, 0.25)',
     marginBottom: 10,
   },
+  taglineBadgeMovil: {
+    alignSelf: 'center',
+  },
   tagline: {
     color: '#FF385C',
     fontWeight: 'bold',
-    fontSize: 11,
-    letterSpacing: 1.2,
+    fontSize: 10,
+    letterSpacing: 1.1,
     textTransform: 'uppercase',
+    textAlign: 'center',
   },
   title: {
     fontSize: 34,
     fontWeight: '900',
     color: '#FFFFFF',
     lineHeight: 42,
-    marginBottom: 22,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
+    marginBottom: 18,
   },
+  titleMovil: {
+    fontSize: 23,
+    lineHeight: 30,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  // BARRA DE BÚSQUEDA CON DEGRADADO CÁLIDO
   searchBar: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFDF9',
+    backgroundImage: Platform.OS === 'web' 
+      ? 'linear-gradient(135deg, #FFFFFF 0%, #FFFDF7 100%)' 
+      : undefined,
     borderRadius: 30,
-    padding: 5,
+    padding: 4,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 15,
-    elevation: 8,
-    marginBottom: 22,
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    shadowColor: '#FF385C',
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 6,
+    marginBottom: 18,
+    width: '100%',
   },
-  selectDpto: {
-    border: 'none',
-    borderRight: '1px solid #E2E8F0',
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    fontSize: 13,
+  searchBarMovil: {
+    borderRadius: 25,
+    padding: 3,
+  },
+  btnSelectDpto: {
+    borderRightWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    maxWidth: 150,
+    justifyContent: 'center',
+  },
+  btnSelectDptoMovil: {
+    maxWidth: 105,
+    paddingHorizontal: 8,
+  },
+  btnSelectDptoText: {
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#1E293B',
-    outline: 'none',
-    cursor: 'pointer',
-    backgroundColor: 'transparent',
-    maxWidth: 150,
   },
   inputSearch: {
     flex: 1,
-    paddingHorizontal: 14,
+    paddingHorizontal: 10,
     fontSize: 13,
     outlineStyle: 'none',
   },
+  inputSearchMovil: {
+    fontSize: 12,
+    paddingHorizontal: 6,
+  },
   btnBuscar: {
     backgroundColor: '#FF385C',
-    paddingHorizontal: 22,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 25,
+  },
+  btnBuscarMovil: {
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 20,
   },
   btnBuscarText: {
     color: '#FFF',
     fontWeight: 'bold',
-    fontSize: 13,
+    fontSize: 12,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: 12,
-    flexWrap: 'wrap',
+    gap: 8,
+    width: '100%',
+    justifyContent: 'center',
   },
   statBox: {
     flex: 1,
-    minWidth: 105,
+    minWidth: 95,
     backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    backdropFilter: Platform.OS === 'web' ? 'blur(10px)' : undefined,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.12)',
     alignItems: 'center',
@@ -241,30 +321,21 @@ const styles = StyleSheet.create({
   statIcon: {
     color: '#FFF',
     fontWeight: '900',
-    fontSize: 14,
+    fontSize: 12,
     marginBottom: 2,
   },
   statText: {
     color: '#CBD5E1',
-    fontSize: 10,
+    fontSize: 9,
     textAlign: 'center',
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
   colImage: {
     flex: 0.9,
     minWidth: 280,
     height: 330,
-    position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  imageGlowEffect: {
-    position: 'absolute',
-    width: '95%',
-    height: '95%',
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 56, 92, 0.15)',
-    filter: Platform.OS === 'web' ? 'blur(20px)' : undefined,
   },
   abuelitoImg: {
     width: '100%',
@@ -273,9 +344,47 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#000',
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 8,
+  },
+  modalDptoOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalDptoCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    maxWidth: 340,
+    width: '100%',
+  },
+  modalDptoTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1E293B',
+    marginBottom: 12,
+    textAlign: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingBottom: 8,
+  },
+  dptoOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginVertical: 2,
+  },
+  dptoOptionActive: {
+    backgroundColor: '#FEE2E2',
+  },
+  dptoOptionText: {
+    fontSize: 13,
+    color: '#334155',
+    fontWeight: '600',
+  },
+  dptoOptionTextActive: {
+    color: '#991B1B',
+    fontWeight: 'bold',
   },
 });

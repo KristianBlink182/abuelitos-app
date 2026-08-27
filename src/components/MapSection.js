@@ -2,19 +2,19 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Linking } from 'react-native';
 
 export default function MapSection({ distrito, provincia, departamento, caserio }) {
-  // Enfoca el Distrito y Provincia para que Google Maps muestre carreteras y rutas reales
   const queryMaps = encodeURIComponent(`${distrito || ''}, ${provincia || ''}, ${departamento || ''}, Peru`);
   const urlGoogleMapsDirecto = `https://www.google.com/maps/search/?api=1&query=${queryMaps}`;
 
   return (
     <View style={styles.boxCard}>
+      {/* CABECERA COMPACTA QUE NO SE DESBORDA */}
       <View style={styles.headRow}>
-        <View>
-          <Text style={styles.boxTitle}>🗺️ Cómo Llegar y Ubicación de Referencia</Text>
-          <Text style={styles.mapSubtitle}>Ruta hacia el distrito de acceso más cercano al caserío:</Text>
+        <View style={{ flex: 1, marginRight: 8 }}>
+          <Text style={styles.boxTitle}>🗺️ Ubicación y Cómo Llegar</Text>
+          <Text style={styles.mapSubtitle} numberOfLines={1}>Ruta de acceso hacia el caserío:</Text>
         </View>
-        <TouchableOpacity style={styles.btnAbrirMaps} onPress={() => Linking.openURL(urlGoogleMapsDirecto)}>
-          <Text style={styles.btnAbrirMapsText}>📍 Abrir en Google Maps ↗</Text>
+        <TouchableOpacity style={styles.btnAbrirMaps} onPress={() => Linking.openURL(urlGoogleMapsDirecto)} activeOpacity={0.85}>
+          <Text style={styles.btnAbrirMapsText}>📍 Abrir Maps ↗</Text>
         </TouchableOpacity>
       </View>
 
@@ -23,7 +23,7 @@ export default function MapSection({ distrito, provincia, departamento, caserio 
           <iframe
             title="Mapa de Acceso"
             width="100%"
-            height="240"
+            height="210"
             frameBorder="0"
             scrolling="no"
             src={`https://maps.google.com/maps?q=${queryMaps}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
@@ -36,10 +36,10 @@ export default function MapSection({ distrito, provincia, departamento, caserio 
 
       <View style={styles.locBadge}>
         <Text style={styles.locNote}>
-          🏡 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Ubicación exacta:</Text> {caserio}.
+          🏡 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Caserío:</Text> {caserio}.
         </Text>
         <Text style={styles.locSubNote}>
-          🚗 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Ruta de acceso:</Text> Llegar a la Plaza de {distrito} ({provincia}) y tomar movilidad rural hacia el {caserio}.
+          🚗 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Acceso:</Text> Llegar a la Plaza de {distrito} y tomar movilidad rural al {caserio}.
         </Text>
       </View>
     </View>
@@ -47,14 +47,14 @@ export default function MapSection({ distrito, provincia, departamento, caserio 
 }
 
 const styles = StyleSheet.create({
-  boxCard: { backgroundColor: '#FFF', padding: 22, borderRadius: 16, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 20 },
-  headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 },
-  boxTitle: { fontSize: 17, fontWeight: 'bold', color: '#2D3748' },
-  mapSubtitle: { fontSize: 13, color: '#64748B', marginTop: 2 },
-  btnAbrirMaps: { backgroundColor: '#2563EB', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  btnAbrirMapsText: { color: '#FFF', fontWeight: 'bold', fontSize: 11 },
+  boxCard: { backgroundColor: '#FFF', padding: 18, borderRadius: 16, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 16 },
+  headRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  boxTitle: { fontSize: 15, fontWeight: 'bold', color: '#1E293B' },
+  mapSubtitle: { fontSize: 11, color: '#64748B', marginTop: 1 },
+  btnAbrirMaps: { backgroundColor: '#2563EB', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 6 },
+  btnAbrirMapsText: { color: '#FFF', fontWeight: 'bold', fontSize: 10 },
   mapContainer: { width: '100%', borderRadius: 10, overflow: 'hidden', backgroundColor: '#EDF2F7' },
-  locBadge: { backgroundColor: '#F8FAFC', padding: 14, borderRadius: 10, marginTop: 12, borderWidth: 1, borderColor: '#E2E8F0', gap: 6 },
-  locNote: { fontSize: 13, color: '#334155' },
-  locSubNote: { fontSize: 12, color: '#64748B' }
+  locBadge: { backgroundColor: '#F8FAFC', padding: 12, borderRadius: 8, marginTop: 10, borderWidth: 1, borderColor: '#E2E8F0', gap: 4 },
+  locNote: { fontSize: 12, color: '#334155' },
+  locSubNote: { fontSize: 11, color: '#64748B' }
 });

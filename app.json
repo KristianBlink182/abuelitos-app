@@ -6,12 +6,24 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#090D16"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "pe.abuelitos.app"
     },
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FF385C"
+      },
       "package": "pe.abuelitos.app"
+    },
+    "web": {
+      "favicon": "./assets/icon.png"
     }
   }
 }

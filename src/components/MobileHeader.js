@@ -1,22 +1,15 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Platform, StatusBar, Linking } from 'react-native';
+import { StyleSheet, View, Image, SafeAreaView, Platform, StatusBar } from 'react-native';
 
-export default function MobileHeader({ onGoHome }) {
-  const compartirApp = () => {
-    const url = 'https://wa.me/?text=' + encodeURIComponent('🇵🇪 Conoce abuelitos.pe y apadrina a un adulto mayor en extrema necesidad en el Perú profundo.');
-    Linking.openURL(url);
-  };
-
+export default function MobileHeader() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onGoHome} activeOpacity={0.8}>
-          <Text style={styles.logoText}>🇵🇪 abuelitos<Text style={{ color: '#FF385C' }}>.pe</Text></Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.btnShare} onPress={compartirApp} activeOpacity={0.8}>
-          <Text style={styles.btnShareText}>📲 Compartir App</Text>
-        </TouchableOpacity>
+        {/* LOGO OFICIAL 100% CENTRADO */}
+        <Image 
+          source={require('../../assets/logo.png')} 
+          style={styles.logoMobile} 
+        />
       </View>
     </SafeAreaView>
   );
@@ -30,26 +23,13 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 18,
-    paddingVertical: 12,
+    justifyContent: 'center',
+    paddingVertical: 8,
   },
-  logoText: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#0F172A',
-  },
-  btnShare: {
-    backgroundColor: '#F1F5F9',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  btnShareText: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#334155',
+  logoMobile: {
+    width: 160,
+    height: 44,
+    resizeMode: 'contain',
   },
 });

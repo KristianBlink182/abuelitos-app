@@ -1,8 +1,10 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 
 export default function DepartmentBubblesSection({ onSelectDpto }) {
-  // Catálogo de paisajes 100% peruanos para todas las regiones
+  const { width } = useWindowDimensions();
+  const esMovil = width <= 768;
+
   const regionesFotos = [
     { nombre: 'Cusco', foto: 'https://images.unsplash.com/photo-1526392060635-9d6019884377?w=400' },
     { nombre: 'Puno', foto: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=400' },
@@ -31,22 +33,24 @@ export default function DepartmentBubblesSection({ onSelectDpto }) {
   ];
 
   return (
-    <View style={styles.sectionWrapper}>
+    <View style={[styles.sectionWrapper, esMovil && styles.sectionWrapperMovil]}>
       <Text style={styles.tag}>COBERTURA EN EL PERÚ PROFUNDO</Text>
-      <Text style={styles.title}>Explora por Departamentos y Regiones</Text>
-      <Text style={styles.subtitle}>Selecciona cualquier región para ver los casos activos y bodegas solidarias:</Text>
+      <Text style={[styles.title, esMovil && styles.titleMovil]}>Explora por Departamentos</Text>
+      <Text style={styles.subtitle}>Toca cualquier región para ver sus casos activos:</Text>
 
-      <View style={styles.regionsGrid}>
+      <View style={[styles.regionsGrid, esMovil && styles.regionsGridMovil]}>
         {regionesFotos.map((r, idx) => (
           <TouchableOpacity 
             key={idx} 
-            style={styles.regionCard}
+            style={[styles.regionCard, esMovil && styles.regionCardMovil]}
             onPress={() => onSelectDpto(r.nombre)}
             activeOpacity={0.85}
           >
             <Image source={{ uri: r.foto }} style={styles.regionCardBg} />
             <View style={styles.regionOverlay} />
-            <Text style={styles.regionName}>📍 {r.nombre}</Text>
+            <Text style={[styles.regionName, esMovil && styles.regionNameMovil]} numberOfLines={1}>
+              {r.nombre}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -57,14 +61,15 @@ export default function DepartmentBubblesSection({ onSelectDpto }) {
 const styles = StyleSheet.create({
   sectionWrapper: {
     backgroundColor: '#FFFDF9',
-    backgroundImage: Platform.OS === 'web' 
-      ? 'radial-gradient(circle at 50% 0%, rgba(255, 56, 92, 0.05) 0%, transparent 60%), linear-gradient(180deg, #F8FAFC 0%, #FFFDF9 50%, #F1F5F9 100%)' 
-      : undefined,
-    paddingVertical: 55,
+    paddingVertical: 45,
     paddingHorizontal: 20,
     alignItems: 'center',
     borderTopWidth: 1,
     borderColor: '#E2E8F0',
+  },
+  sectionWrapperMovil: {
+    paddingVertical: 25,
+    paddingHorizontal: 12,
   },
   tag: {
     color: '#FF385C',
@@ -72,6 +77,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1.5,
     marginBottom: 4,
+    textAlign: 'center',
   },
   title: {
     fontSize: 26,
@@ -80,33 +86,44 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 4,
   },
+  titleMovil: {
+    fontSize: 20,
+  },
   subtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#64748B',
     textAlign: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
   },
   regionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
     maxWidth: 1150,
     width: '100%',
     justifyContent: 'center',
   },
+  regionsGridMovil: {
+    gap: 6,
+    justifyContent: 'space-between',
+  },
   regionCard: {
     width: 175,
-    height: 90,
+    height: 85,
     borderRadius: 14,
     overflow: 'hidden',
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
-    cursor: 'pointer',
     elevation: 3,
     shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  },
+  regionCardMovil: {
+    width: '31.5%', // 3 columnas exactas en pantalla de celular
+    height: 65,
+    borderRadius: 10,
   },
   regionCardBg: {
     position: 'absolute',
@@ -126,9 +143,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     zIndex: 2,
     textAlign: 'center',
-    paddingHorizontal: 8,
-    textShadowColor: 'rgba(0,0,0,0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    paddingHorizontal: 6,
+  },
+  regionNameMovil: {
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });

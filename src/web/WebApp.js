@@ -1,41 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, ScrollView, SafeAreaView, useWindowDimensions, Platform } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Navbar from './src/components/Navbar';
-import MobileHeader from './src/components/MobileHeader';
-import BottomTabBar from './src/components/BottomTabBar';
-import HomeScreen from './src/screens/HomeScreen';
-import DetailScreen from './src/screens/DetailScreen';
-import RegisterScreen from './src/screens/RegisterScreen';
-import EditScreen from './src/screens/EditScreen';
-import CaseriosScreen from './src/screens/CaseriosScreen';
-import AutoridadesScreen from './src/screens/AutoridadesScreen';
-import BodegaPortalScreen from './src/screens/BodegaPortalScreen';
-import AdminScreen from './src/screens/AdminScreen';
-import FAQScreen from './src/screens/FAQScreen';
-import TermsScreen from './src/screens/TermsScreen';
-import AboutScreen from './src/screens/AboutScreen';
-import ContactScreen from './src/screens/ContactScreen';
-import FavoritesScreen from './src/screens/FavoritesScreen';
-import AccountSettingsScreen from './src/screens/AccountSettingsScreen';
-import DirectorySearchScreen from './src/screens/DirectorySearchScreen';
-import Footer from './src/components/Footer';
-import AuthModal from './src/components/AuthModal';
-import { getAbuelitos } from './src/services/api';
+import { StyleSheet, View, ScrollView, SafeAreaView } from 'react-native';
+import Navbar from '../components/Navbar';
+import HomeScreen from '../screens/HomeScreen';
+import DetailScreen from '../screens/DetailScreen';
+import RegisterScreen from '../screens/RegisterScreen';
+import EditScreen from '../screens/EditScreen';
+import CaseriosScreen from '../screens/CaseriosScreen';
+import AutoridadesScreen from '../screens/AutoridadesScreen';
+import BodegaPortalScreen from '../screens/BodegaPortalScreen';
+import AdminScreen from '../screens/AdminScreen';
+import FAQScreen from '../screens/FAQScreen';
+import TermsScreen from '../screens/TermsScreen';
+import ContactScreen from '../screens/ContactScreen';
+import DonorProfileScreen from '../screens/DonorProfileScreen';
+import DirectorySearchScreen from '../screens/DirectorySearchScreen';
+import Footer from '../components/Footer';
+import AuthModal from '../components/AuthModal';
+import { getAbuelitos } from '../services/api';
 
-if (Platform.OS === 'web' && typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
-    body, * { font-family: 'Inter', sans-serif !important; }
-    h1, h2, h3, h4 { font-family: 'Plus Jakarta Sans', sans-serif !important; }
-  `;
-  document.head.appendChild(style);
-}
-
-export default function App() {
-  const { width } = useWindowDimensions();
-  const esEscritorio = width > 768;
+export default function WebApp() {
   const scrollViewRef = useRef(null);
 
   const [abuelitos, setAbuelitos] = useState([]);
@@ -48,27 +31,14 @@ export default function App() {
   const [modalAuthVisible, setModalAuthVisible] = useState(false);
 
   useEffect(() => {
-    cargarDatosYSesion();
+    cargarDatos();
   }, []);
 
-  const cargarDatosYSesion = async () => {
+  const cargarDatos = async () => {
     setLoading(true);
-    try {
-      const sesionGuardada = await AsyncStorage.getItem('usuario_sesion_activa');
-      if (sesionGuardada) {
-        setUsuarioSesion(JSON.parse(sesionGuardada));
-      }
-    } catch (e) {}
-
     const data = await getAbuelitos();
     setAbuelitos(Array.isArray(data) ? data : []);
     setLoading(false);
-  };
-
-  const handleCerrarSesion = async () => {
-    await AsyncStorage.removeItem('usuario_sesion_activa');
-    setUsuarioSesion(null);
-    setCurrentView('home');
   };
 
   const handleNavigate = (view) => {
@@ -85,14 +55,6 @@ export default function App() {
     }, 50);
   };
 
-  const handleAbrirEditar = (item) => {
-    setSelectedAbuelito(item);
-    setCurrentView('edit');
-    setTimeout(() => {
-      scrollViewRef.current?.scrollTo({ y: 0, animated: false });
-    }, 50);
-  };
-
   const handleAbrirExplorador = (dpto) => {
     setDptoExplorar(dpto);
     setCurrentView('directory_search');
@@ -102,15 +64,11 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.mainContainer}>
-        {esEscritorio ? (
-          <Navbar 
-            onNavigate={handleNavigate} 
-            usuarioSesion={usuarioSesion}
-            onOpenAuth={() => setModalAuthVisible(true)}
-          />
-        ) : (
-          <MobileHeader onGoHome={() => handleNavigate('home')} />
-        )}
+        <Navbar 
+          onNavigate={handleNavigate} 
+          usuarioSesion={usuarioSesion}
+          onOpenAuth={() => setModalAuthVisible(true)}
+        />
 
         <ScrollView 
           ref={scrollViewRef} 
@@ -126,10 +84,6 @@ export default function App() {
               onSelectDpto={handleAbrirExplorador}
               onEjecutarBusqueda={(dpto) => handleAbrirExplorador(dpto)}
             />
-          )}
-
-          {currentView === 'about' && (
-            <AboutScreen onGoHome={() => handleNavigate('home')} />
           )}
 
           {currentView === 'directory_search' && (
@@ -148,21 +102,15 @@ export default function App() {
             <TermsScreen onGoHome={() => handleNavigate('home')} />
           )}
 
-          {currentView === 'favorites' && (
-            <FavoritesScreen 
+          {currentView === 'donor_profile' && usuarioSesion && (
+            <DonorProfileScreen 
               usuario={usuarioSesion}
               onSelectAbuelito={handleSelectAbuelito}
-              onOpenAuth={() => setModalAuthVisible(true)}
+              onCerrarSesion={() => {
+                setUsuarioSesion(null);
+                setCurrentView('home');
+              }}
               onGoHome={() => handleNavigate('home')}
-            />
-          )}
-
-          {currentView === 'account' && (
-            <AccountSettingsScreen 
-              usuario={usuarioSesion}
-              onSelectAbuelito={handleSelectAbuelito}
-              onCerrarSesion={handleCerrarSesion}
-              onOpenAuth={() => setModalAuthVisible(true)}
             />
           )}
 
@@ -183,18 +131,14 @@ export default function App() {
           )}
 
           {currentView === 'admin' && (
-            <AdminScreen 
-              onVerCaso={handleSelectAbuelito} 
-              onEditarCaso={handleAbrirEditar}
-              onCerrarSesionAdmin={handleCerrarSesion}
-            />
+            <AdminScreen onVerCaso={handleSelectAbuelito} />
           )}
 
           {currentView === 'register' && (
             <RegisterScreen 
               onCancel={() => handleNavigate('home')}
               onSuccess={() => {
-                cargarDatosYSesion();
+                cargarDatos();
                 handleNavigate('home');
               }}
             />
@@ -204,12 +148,12 @@ export default function App() {
             <EditScreen 
               abuelito={selectedAbuelito}
               onCancel={() => {
-                setCurrentView('admin');
+                setCurrentView('detail');
                 scrollViewRef.current?.scrollTo({ y: 0, animated: false });
               }}
               onSuccess={() => {
-                cargarDatosYSesion();
-                handleNavigate('admin');
+                cargarDatos();
+                handleNavigate('home');
               }}
             />
           )}
@@ -220,21 +164,15 @@ export default function App() {
               usuarioDonante={usuarioSesion}
               onOpenAuth={() => setModalAuthVisible(true)}
               onBack={() => handleNavigate('home')}
-              onEdit={() => handleAbrirEditar(selectedAbuelito)}
+              onEdit={() => {
+                setCurrentView('edit');
+                scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+              }}
             />
           )}
 
-          {esEscritorio && <Footer onNavigate={handleNavigate} />}
+          <Footer onNavigate={handleNavigate} />
         </ScrollView>
-
-        {!esEscritorio && (
-          <BottomTabBar 
-            currentView={currentView} 
-            onNavigate={handleNavigate}
-            usuarioSesion={usuarioSesion}
-            onOpenAuth={() => setModalAuthVisible(true)}
-          />
-        )}
 
         <AuthModal 
           visible={modalAuthVisible} 
@@ -243,7 +181,7 @@ export default function App() {
             setUsuarioSesion(user);
             if (user.tipo === 'bodega') setCurrentView('bodega_portal');
             if (user.tipo === 'admin') setCurrentView('admin');
-            if (user.tipo === 'donante') setCurrentView('account');
+            if (user.tipo === 'donante') setCurrentView('donor_profile');
           }} 
         />
       </View>

@@ -1,18 +1,47 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
 
 export default function Navbar({ onNavigate, usuarioSesion, onOpenAuth }) {
+  const getEtiquetaSesion = () => {
+    if (!usuarioSesion) return '';
+    if (usuarioSesion.tipo === 'admin') return '🔐 Admin';
+    if (usuarioSesion.tipo === 'bodega') return '🏪 Bodega';
+    return `👤 ${(usuarioSesion.nombre || 'Donante').split(' ')[0]}`;
+  };
+
+  const handleClicSesion = () => {
+    if (!usuarioSesion) {
+      onOpenAuth();
+      return;
+    }
+    if (usuarioSesion.tipo === 'admin') onNavigate('admin');
+    else if (usuarioSesion.tipo === 'bodega') onNavigate('bodega_portal');
+    else onNavigate('account');
+  };
+
   return (
     <View style={styles.navbar}>
-      {/* 1. LOGO ABUELITOS.PE */}
-      <TouchableOpacity onPress={() => onNavigate('home')} style={styles.navBrand}>
-        <Text style={styles.navLogoText}>🇵🇪 abuelitos<Text style={{ color: '#FF385C' }}>.pe</Text></Text>
+      
+      {/* 1. LOGO OFICIAL */}
+      <TouchableOpacity 
+        onPress={() => onNavigate('home')} 
+        style={styles.navBrand}
+        activeOpacity={0.85}
+      >
+        <Image 
+          source={require('../../assets/logo.png')} 
+          style={styles.logoWeb} 
+        />
       </TouchableOpacity>
 
-      {/* 2. MENÚ CENTRAL ORDENADO Y BONITO */}
+      {/* 2. MENÚ CENTRAL */}
       <View style={styles.centerMenu}>
         <TouchableOpacity style={styles.centerLink} onPress={() => onNavigate('home')}>
           <Text style={styles.centerLinkText}>Inicio</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.centerLink} onPress={() => onNavigate('about')}>
+          <Text style={styles.centerLinkText}>Quiénes Somos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.centerLink} onPress={() => onNavigate('directory_search')}>
@@ -24,28 +53,35 @@ export default function Navbar({ onNavigate, usuarioSesion, onOpenAuth }) {
         </TouchableOpacity>
       </View>
 
-      {/* 3. BOTÓN INGRESAR / REGISTRARSE Y POSTULAR */}
+      {/* 3. BOTONES DE ACCESO Y POSTULACIÓN */}
       <View style={styles.rightActions}>
         {usuarioSesion ? (
           <TouchableOpacity 
-            onPress={() => onNavigate(usuarioSesion.tipo === 'bodega' ? 'bodega_portal' : (usuarioSesion.tipo === 'admin' ? 'admin' : 'donor_profile'))} 
+            onPress={handleClicSesion} 
             style={styles.btnSesionActiva}
+            activeOpacity={0.85}
           >
-            <Text style={styles.btnSesionActivaText}>
-              {usuarioSesion.tipo === 'bodega' ? '🏪 ' : (usuarioSesion.tipo === 'admin' ? '🔐 ' : '👤 ')}
-              {usuarioSesion.nombre.split(' ')[0]}
-            </Text>
+            <Text style={styles.btnSesionActivaText}>{getEtiquetaSesion()}</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={onOpenAuth} style={styles.btnIngresarRegistrarse} activeOpacity={0.85}>
+          <TouchableOpacity 
+            onPress={onOpenAuth} 
+            style={styles.btnIngresarRegistrarse} 
+            activeOpacity={0.85}
+          >
             <Text style={styles.btnIngresarText}>👤 Ingresar / Registrarse</Text>
           </TouchableOpacity>
         )}
 
-        <TouchableOpacity style={styles.btnNavPost} onPress={() => onNavigate('register')} activeOpacity={0.85}>
+        <TouchableOpacity 
+          style={styles.btnNavPost} 
+          onPress={() => onNavigate('register')} 
+          activeOpacity={0.85}
+        >
           <Text style={styles.btnNavPostText}>+ Postular Caso</Text>
         </TouchableOpacity>
       </View>
+
     </View>
   );
 }
@@ -55,7 +91,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 10,
     paddingHorizontal: 28,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
@@ -65,22 +101,22 @@ const styles = StyleSheet.create({
   navBrand: {
     cursor: 'pointer',
   },
-  navLogoText: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#0F172A',
+  logoWeb: {
+    width: 170,
+    height: 48,
+    resizeMode: 'contain',
   },
   centerMenu: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 28,
+    gap: 26,
   },
   centerLink: {
     paddingVertical: 6,
     cursor: 'pointer',
   },
   centerLinkText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#334155',
   },
@@ -95,10 +131,6 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 20,
     cursor: 'pointer',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 2,
   },
   btnIngresarText: {
     color: '#FFFFFF',
@@ -110,6 +142,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
+    cursor: 'pointer',
+    borderWidth: 1,
+    borderColor: '#FECDD3',
   },
   btnSesionActivaText: {
     color: '#991B1B',
