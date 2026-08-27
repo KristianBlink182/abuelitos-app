@@ -24,14 +24,26 @@ workflows:
       - name: Instalar CocoaPods
         script: |
           cd ios && pod install
-      - name: Inyectar perfiles en Xcode
+      - name: Configurar perfiles y Compilar IPA para iOS
         script: |
-          xcode-project use-profiles --project ios/frontendabuelitos.xcodeproj
-      - name: Compilar IPA para iOS
-        script: |
+          # 1. Detectar automáticamente el Workspace y Proyecto real generado por Expo
+          WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -n 1)
+          PROJECT=$(find ios -maxdepth 1 -name "*.xcodeproj" | head -n 1)
+          SCHEME=$(basename "$PROJECT" .xcodeproj)
+          
+          echo "==========================================="
+          echo "✅ Workspace detectado: $WORKSPACE"
+          echo "✅ Proyecto detectado: $PROJECT"
+          echo "✅ Scheme detectado: $SCHEME"
+          echo "==========================================="
+          
+          # 2. Inyectar perfiles oficiales de Apple
+          xcode-project use-profiles --project "$PROJECT"
+          
+          # 3. Compilar el archivo .IPA para TestFlight
           xcode-project build-ipa \
-            --workspace ios/frontendabuelitos.xcworkspace \
-            --scheme frontendabuelitos
+            --workspace "$WORKSPACE" \
+            --scheme "$SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
