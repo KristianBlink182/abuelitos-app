@@ -1,24 +1,36 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Platform } from 'react-native';
 
-export default function BottomTabBar({ currentView, onNavigate }) {
+export default function BottomTabBar({ currentView, onNavigate, usuarioSesion, onOpenAuth }) {
   const tabs = [
     { id: 'home', label: 'Inicio', icon: '🏠' },
-    { id: 'caserios', label: 'Caseríos', icon: '🏔️' },
-    { id: 'autoridades', label: 'Autoridades', icon: '🛡️' },
-    { id: 'bodega_portal', label: 'Bodegas', icon: '🏪' },
-    { id: 'register', label: 'Postular', icon: '➕' },
+    { id: 'directory_search', label: 'Explorar', icon: '🔍' },
+    { id: 'donor_profile', label: 'Favoritos', icon: '❤️' },
+    { id: 'auth_or_profile', label: usuarioSesion ? 'Mi Cuenta' : 'Ingresar', icon: '👤' },
   ];
+
+  const handleTabPress = (tabId) => {
+    if (tabId === 'donor_profile' && !usuarioSesion) {
+      onOpenAuth();
+      return;
+    }
+    if (tabId === 'auth_or_profile') {
+      if (!usuarioSesion) onOpenAuth();
+      else onNavigate('donor_profile');
+      return;
+    }
+    onNavigate(tabId);
+  };
 
   return (
     <View style={styles.tabBarContainer}>
       {tabs.map((tab) => {
-        const isActive = currentView === tab.id;
+        const isActive = currentView === tab.id || (tab.id === 'auth_or_profile' && currentView === 'donor_profile');
         return (
           <TouchableOpacity
             key={tab.id}
             style={styles.tabItem}
-            onPress={() => onNavigate(tab.id)}
+            onPress={() => handleTabPress(tab.id)}
             activeOpacity={0.7}
           >
             <Text style={[styles.tabIcon, isActive && styles.tabIconActive]}>{tab.icon}</Text>
@@ -38,14 +50,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderColor: '#E2E8F0',
-    paddingVertical: 8,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 10,
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 26 : 10,
     justifyContent: 'space-around',
-    elevation: 8,
+    elevation: 10,
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 10,
-    shadowOffset: { width: 0, height: -3 },
   },
   tabItem: {
     alignItems: 'center',
@@ -54,8 +65,8 @@ const styles = StyleSheet.create({
   },
   tabIcon: {
     fontSize: 20,
-    marginBottom: 2,
-    opacity: 0.6,
+    marginBottom: 3,
+    opacity: 0.55,
   },
   tabIconActive: {
     opacity: 1,

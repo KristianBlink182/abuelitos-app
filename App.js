@@ -20,7 +20,6 @@ import Footer from './src/components/Footer';
 import AuthModal from './src/components/AuthModal';
 import { getAbuelitos } from './src/services/api';
 
-// Inyectar Plus Jakarta Sans e Inter en la Web
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
@@ -90,10 +89,7 @@ export default function App() {
             onOpenAuth={() => setModalAuthVisible(true)}
           />
         ) : (
-          <MobileHeader 
-            onGoHome={() => handleNavigate('home')} 
-            onGoAdmin={() => setModalAuthVisible(true)} 
-          />
+          <MobileHeader onGoHome={() => handleNavigate('home')} />
         )}
 
         <ScrollView 
@@ -197,13 +193,17 @@ export default function App() {
             />
           )}
 
-          <Footer onNavigate={handleNavigate} />
+          {/* EL FOOTER SOLO SE MUESTRA EN COMPUTADORAS (ESCRITORIO), NUNCA EN LA APP MÓVIL */}
+          {esEscritorio && <Footer onNavigate={handleNavigate} />}
         </ScrollView>
 
+        {/* BARRA NATIVA DE DONANTE PARA CELULARES */}
         {!esEscritorio && (
           <BottomTabBar 
             currentView={currentView} 
-            onNavigate={handleNavigate} 
+            onNavigate={handleNavigate}
+            usuarioSesion={usuarioSesion}
+            onOpenAuth={() => setModalAuthVisible(true)}
           />
         )}
 
@@ -214,6 +214,7 @@ export default function App() {
             setUsuarioSesion(user);
             if (user.tipo === 'bodega') setCurrentView('bodega_portal');
             if (user.tipo === 'admin') setCurrentView('admin');
+            if (user.tipo === 'donante') setCurrentView('donor_profile');
           }} 
         />
       </View>
