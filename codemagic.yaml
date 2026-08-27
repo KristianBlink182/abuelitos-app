@@ -1,0 +1,40 @@
+workflows:
+  ios-release:
+    name: Compilar iOS para Apple App Store
+    environment:
+      node: 20.x
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Instalar dependencias
+        script: npm install
+      - name: Prebuild de React Native / Expo
+        script: npx expo prebuild --platform ios --clean
+      - name: Compilar IPA para iOS
+        script: |
+          cd ios
+          pod install
+          xcode-project build-ipa --workspace abuelitospe.xcworkspace --scheme abuelitospe
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+
+  android-release:
+    name: Compilar APK / AAB para Google Play
+    environment:
+      node: 20.x
+      java: 17
+    scripts:
+      - name: Instalar dependencias
+        script: npm install
+      - name: Prebuild de React Native / Expo
+        script: npx expo prebuild --platform android --clean
+      - name: Compilar AAB
+        script: |
+          cd android
+          ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.aab
+      - android/app/build/outputs/**/*.apk
