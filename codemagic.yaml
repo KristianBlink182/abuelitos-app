@@ -24,9 +24,9 @@ workflows:
       - name: Instalar CocoaPods
         script: |
           cd ios && pod install
-      - name: Inyectar Perfil de Aprovisionamiento en Xcode
+      - name: Inyectar Perfil Abuelitos AppStore
         script: |
-          xcode-project use-profiles --project ios/frontendabuelitos.xcodeproj
+          xcode-project use-profiles --project ios/frontendabuelitos.xcodeproj --profile-specifier "Abuelitos AppStore"
       - name: Compilar IPA para iOS
         script: |
           xcode-project build-ipa \

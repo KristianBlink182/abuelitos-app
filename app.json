@@ -1,33 +1,17 @@
 {
   "expo": {
-    "name": "frontend-abuelitos",
-    "slug": "frontend-abuelitos",
+    "name": "Abuelitos Perú",
+    "slug": "frontendabuelitos",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "pe.abuelitos.app"
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "package": "com.kristian182.frontendabuelitos"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "3a385823-3504-4619-b89e-7a46f884b189"
-      }
-    },
-    "plugins": [
-      "expo-sharing"
-    ]
+      "package": "pe.abuelitos.app"
+    }
   }
 }
