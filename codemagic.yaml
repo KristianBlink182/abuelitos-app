@@ -24,23 +24,19 @@ workflows:
       - name: Instalar CocoaPods
         script: |
           cd ios && pod install
-      - name: Configurar perfiles y Compilar IPA para iOS
+      - name: Forzar nuevo numero de version para Apple
         script: |
-          # 1. Detectar automáticamente el Workspace y Proyecto real generado por Expo
-          WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -n 1)
+          # Incrementa el numero de version a 10 para superar cualquier version anterior
+          find ios -name "Info.plist" -exec /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $(($BUILD_NUMBER + 5))" {} \;
+          find ios -name "Info.plist" -exec /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.1" {} \;
+      - name: Inyectar perfiles oficiales de Apple
+        script: |
           PROJECT=$(find ios -maxdepth 1 -name "*.xcodeproj" | head -n 1)
-          SCHEME=$(basename "$PROJECT" .xcodeproj)
-          
-          echo "==========================================="
-          echo "✅ Workspace detectado: $WORKSPACE"
-          echo "✅ Proyecto detectado: $PROJECT"
-          echo "✅ Scheme detectado: $SCHEME"
-          echo "==========================================="
-          
-          # 2. Inyectar perfiles oficiales de Apple
           xcode-project use-profiles --project "$PROJECT"
-          
-          # 3. Compilar el archivo .IPA para TestFlight
+      - name: Compilar IPA para iOS
+        script: |
+          WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" | head -n 1)
+          SCHEME=$(basename $(find ios -maxdepth 1 -name "*.xcodeproj" | head -n 1) .xcodeproj)
           xcode-project build-ipa \
             --workspace "$WORKSPACE" \
             --scheme "$SCHEME"
