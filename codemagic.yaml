@@ -26,12 +26,11 @@ workflows:
           xcode-project use-profiles
       - name: Compilar IPA para iOS
         script: |
-          WORKSPACE=$(find ios -name "*.xcworkspace" | head -n 1)
-          SCHEME=$(xcode-project list-schemes --workspace "$WORKSPACE" | head -n 1)
-          echo "Compilando Workspace: $WORKSPACE con Scheme: $SCHEME"
+          PROJECT_NAME=$(basename ios/*.xcodeproj .xcodeproj)
+          echo "Compilando proyecto: $PROJECT_NAME"
           xcode-project build-ipa \
-            --workspace "$WORKSPACE" \
-            --scheme "$SCHEME"
+            --workspace "ios/$PROJECT_NAME.xcworkspace" \
+            --scheme "$PROJECT_NAME"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
