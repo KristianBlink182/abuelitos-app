@@ -1,40 +1,36 @@
 workflows:
-  ios-release:
-    name: Compilar iOS para Apple App Store
+  ios-testflight:
+    name: Abuelitos Peru - TestFlight Release
+    instance_type: mac_mini_m2
+    max_build_duration: 60
     environment:
-      node: 20.x
+      node: 20
       xcode: latest
       cocoapods: default
+      vars:
+        BUNDLE_ID: "pe.abuelitos.app"
     scripts:
       - name: Instalar dependencias
-        script: npm install
-      - name: Prebuild de React Native / Expo
-        script: npx expo prebuild --platform ios --clean
+        script: |
+          npm install
+      - name: Prebuild nativo iOS (Expo)
+        script: |
+          npx expo prebuild --platform ios --clean
+      - name: Instalar CocoaPods
+        script: |
+          cd ios && pod install
+      - name: Configurar firma automatica de Apple
+        script: |
+          xcode-project use-profiles
       - name: Compilar IPA para iOS
         script: |
-          cd ios
-          pod install
-          xcode-project build-ipa --workspace abuelitospe.xcworkspace --scheme abuelitospe
+          xcode-project build-ipa \
+            --workspace "ios/*.xcworkspace" \
+            --scheme "abuelitosapp"
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
         auth: integration
-
-  android-release:
-    name: Compilar APK / AAB para Google Play
-    environment:
-      node: 20.x
-      java: 17
-    scripts:
-      - name: Instalar dependencias
-        script: npm install
-      - name: Prebuild de React Native / Expo
-        script: npx expo prebuild --platform android --clean
-      - name: Compilar AAB
-        script: |
-          cd android
-          ./gradlew bundleRelease
-    artifacts:
-      - android/app/build/outputs/**/*.aab
-      - android/app/build/outputs/**/*.apk
+        submit_to_testflight: true
+        expire_build_submitted_for_review: true
