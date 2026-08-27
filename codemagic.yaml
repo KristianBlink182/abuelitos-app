@@ -21,18 +21,17 @@ workflows:
       - name: Instalar CocoaPods
         script: |
           cd ios && pod install
-      - name: Generar y descargar certificados de Apple
+      - name: Configurar llavero y certificados de Apple
         script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
           xcode-project use-profiles
       - name: Compilar IPA para iOS
         script: |
-          PROJECT_NAME=$(basename ios/*.xcodeproj .xcodeproj)
           xcode-project build-ipa \
-            --workspace "ios/$PROJECT_NAME.xcworkspace" \
-            --scheme "$PROJECT_NAME"
+            --workspace ios/frontendabuelitos.xcworkspace \
+            --scheme frontendabuelitos
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
