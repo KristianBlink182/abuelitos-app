@@ -21,13 +21,15 @@ workflows:
       - name: Instalar CocoaPods
         script: |
           cd ios && pod install
-      - name: Configurar perfiles de Apple
+      - name: Generar y descargar certificados de Apple
         script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
           xcode-project use-profiles
       - name: Compilar IPA para iOS
         script: |
           PROJECT_NAME=$(basename ios/*.xcodeproj .xcodeproj)
-          echo "Compilando proyecto: $PROJECT_NAME"
           xcode-project build-ipa \
             --workspace "ios/$PROJECT_NAME.xcworkspace" \
             --scheme "$PROJECT_NAME"
