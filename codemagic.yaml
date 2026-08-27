@@ -24,9 +24,9 @@ workflows:
       - name: Instalar CocoaPods
         script: |
           cd ios && pod install
-      - name: Aplicar firma automatica de Codemagic
+      - name: Inyectar Perfil de Aprovisionamiento en Xcode
         script: |
-          xcode-project use-profiles
+          xcode-project use-profiles --project ios/frontendabuelitos.xcodeproj
       - name: Compilar IPA para iOS
         script: |
           xcode-project build-ipa \
