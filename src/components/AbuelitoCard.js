@@ -19,9 +19,9 @@ export default function AbuelitoCard({ item, onSelect }) {
       onPress={() => onSelect(item)} 
       activeOpacity={0.9}
     >
-      {/* FOTO CON ENCUADRE COMPLETO DESDE EL TOPE */}
-      <View style={[styles.imageWrapper, esMovil && styles.imageWrapperMovil]}>
-        {Platform.OS === 'web' && !esMovil ? (
+      {/* CONTENEDOR CON ANCLAJE SUPERIOR PARA VER LA CARA COMPLETA */}
+      <View style={styles.imageWrapper}>
+        {Platform.OS === 'web' ? (
           <img 
             src={item.foto_url} 
             alt={item.nombre_completo}
@@ -36,9 +36,10 @@ export default function AbuelitoCard({ item, onSelect }) {
             }}
           />
         ) : (
+          /* TÉCNICA NATIVA PARA IOS: IMAGEN ANCLADA EN EL TOPE SUPERIOR */
           <Image 
             source={{ uri: item.foto_url }} 
-            style={styles.gridCardImage}
+            style={styles.imageNativeIos}
             resizeMode="cover"
           />
         )}
@@ -111,16 +112,18 @@ const styles = StyleSheet.create({
   imageWrapper: {
     position: 'relative',
     width: '100%',
-    height: 240,
+    height: 250,
     backgroundColor: '#0F172A',
     overflow: 'hidden',
   },
-  imageWrapperMovil: {
-    height: 280, // Altura amplia para celular para no cortar cabezas ni sombreros
-  },
-  gridCardImage: {
+  // ANCLAJE SUPERIOR PARA IPHONE: Top 0 muestra la cabeza/sombrero y corta abajo
+  imageNativeIos: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
     width: '100%',
-    height: '100%',
+    height: 320, // Altura extendida para que el recorte sea en la cintura, no en la cara
   },
   locationBadge: {
     position: 'absolute',

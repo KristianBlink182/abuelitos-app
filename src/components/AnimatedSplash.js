@@ -5,7 +5,7 @@ const { width, height } = Dimensions.get('screen');
 
 export default function AnimatedSplash({ onFinish }) {
   useEffect(() => {
-    // Retener la imagen 4 segundos exactos
+    // 4 segundos exactos
     const timer = setTimeout(() => {
       onFinish();
     }, 4000);
@@ -15,10 +15,11 @@ export default function AnimatedSplash({ onFinish }) {
 
   return (
     <View style={styles.splashContainer}>
-      <StatusBar hidden />
+      <StatusBar hidden={true} />
       <Image 
-        source={require('../../assets/splash-icon.png')} 
-        style={styles.splashImage} 
+        source={require('../../assets/splash.png')} 
+        style={styles.fullScreenImage} 
+        resizeMode="cover"
       />
     </View>
   );
@@ -29,17 +30,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
+    right: 0,
+    bottom: 0,
     width: width,
     height: height,
-    backgroundColor: '#090D16',
+    backgroundColor: '#000000',
     zIndex: 9999999,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 100,
   },
-  splashImage: {
+  fullScreenImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
 });
