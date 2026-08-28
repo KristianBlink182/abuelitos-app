@@ -5,9 +5,11 @@ const { width, height } = Dimensions.get('screen');
 
 export default function AnimatedSplash({ onFinish }) {
   useEffect(() => {
-    // 4 segundos exactos
+    // 4 segundos exactos en pantalla
     const timer = setTimeout(() => {
-      onFinish();
+      if (onFinish) {
+        onFinish();
+      }
     }, 4000);
 
     return () => clearTimeout(timer);
@@ -16,9 +18,9 @@ export default function AnimatedSplash({ onFinish }) {
   return (
     <View style={styles.splashContainer}>
       <StatusBar hidden={true} />
-      <Image 
-        source={require('../../assets/splash.png')} 
-        style={styles.fullScreenImage} 
+      <Image
+        source={require('../../assets/splash.png')}
+        style={styles.fullScreenImage}
         resizeMode="cover"
       />
     </View>

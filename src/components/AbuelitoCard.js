@@ -116,14 +116,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F172A',
     overflow: 'hidden',
   },
-  // ANCLAJE SUPERIOR PARA IPHONE: Top 0 muestra la cabeza/sombrero y corta abajo
+  // ANCLAJE SUPERIOR PARA IPHONE: Desplaza hacia abajo para revelar rostro, sombrero y frente
   imageNativeIos: {
     position: 'absolute',
-    top: 0,
+    top: 25,                      // ⭐️ Baja la imagen 25px para que la cabeza/ojos entren completos
     left: 0,
     right: 0,
     width: '100%',
-    height: 320, // Altura extendida para que el recorte sea en la cintura, no en la cara
+    height: 270,                  // ⭐️ Cubre todo el alto sin desbordar por arriba
+    resizeMode: 'cover',
   },
   locationBadge: {
     position: 'absolute',

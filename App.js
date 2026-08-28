@@ -54,18 +54,17 @@ export default function App() {
   const [usuarioSesion, setUsuarioSesion] = useState(null);
   const [modalAuthVisible, setModalAuthVisible] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
     cargarDatosYSesion();
 
-    // 2. RETENER 4 SEGUNDOS EXACTOS ANTES DE DESVANECER
-    const timerSplash = setTimeout(async () => {
+    // Liberar el splash nativo de inmediato para mostrar AnimatedSplash
+    async function liberarSplashNativo() {
       try {
         await SplashScreen.hideAsync();
       } catch (e) {}
-      setMostrarSplash(false);
-    }, 4000);
+    }
 
-    return () => clearTimeout(timerSplash);
+    liberarSplashNativo();
   }, []);
 
   const cargarDatosYSesion = async () => {
