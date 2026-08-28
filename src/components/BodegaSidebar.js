@@ -98,21 +98,21 @@ export default function BodegaSidebar({ abuelito, usuarioDonante, onOpenAuth }) 
           </View>
         )}
 
-        {/* BOTÓN REGISTRAR DONACIÓN */}
-        <TouchableOpacity style={styles.btnReportar} onPress={handleAbrirDonacion} activeOpacity={0.85}>
-          <Text style={styles.btnReportarText}>✨ Ya hice mi donación (Sumar Saldo)</Text>
-        </TouchableOpacity>
+       {/* TARJETA DEL BANCO DE LA NACIÓN (AHORA ARRIBA) */}
+          <TouchableOpacity
+            style={styles.bankCardBox}
+            onPress={() => copiarTexto(cuentaBanco, 'Número de cuenta')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.bankName}>🏦 {nombreBanco}:</Text>
+            <Text style={styles.bankAccount}>{cuentaBanco} 📋</Text>
+            <Text style={styles.bankTip}>Toca para copiar número de cuenta</Text>
+          </TouchableOpacity>
 
-        {/* TARJETA DEL BANCO DE LA NACIÓN */}
-        <TouchableOpacity 
-          style={styles.bankCardBox} 
-          onPress={() => copiarTexto(cuentaBanco, 'Número de cuenta')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.bankName}>🏦 {nombreBanco}:</Text>
-          <Text style={styles.bankAccount}>{cuentaBanco} 📋</Text>
-          <Text style={styles.bankTip}>Toca para copiar número de cuenta</Text>
-        </TouchableOpacity>
+          {/* BOTÓN REGISTRAR DONACIÓN (AHORA CON "NOTIFICAR") */}
+          <TouchableOpacity style={styles.btnReportar} onPress={handleAbrirDonacion} activeOpacity={0.85}>
+            <Text style={styles.btnReportarText}>✨ Ya hice mi donación (Notificar)</Text>
+          </TouchableOpacity>
       </View>
 
       {/* 4. PADRINOS Y DONANTES ACTIVOS */}

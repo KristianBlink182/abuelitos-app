@@ -142,12 +142,24 @@ export default function BodegaPortalScreen() {
                 
                 <Text style={styles.label}>Selecciona el Pack de Canasta:</Text>
                 <View style={styles.packRow}>
-                  <TouchableOpacity style={[styles.btnPack, monto === '40' && styles.btnPackActive]} onPress={() => { setMonto('40'); setTipoCanasta('Canasta Básica (S/ 40)'); }}>
-                    <Text style={[styles.packText, monto === '40' && styles.packTextActive]}>🧺 Básica (S/ 40)</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.btnPack, monto === '80' && styles.btnPackActive]} onPress={() => { setMonto('80'); setTipoCanasta('Canasta Familiar (S/ 80)'); }}>
-                    <Text style={[styles.packText, monto === '80' && styles.packTextActive]}>🧺 Familiar (S/ 80)</Text>
-                  </TouchableOpacity>
+                 {/* CONTENIDO FIJO DEL PACK SELECCIONADO */}
+          <View style={{ backgroundColor: '#FFFBEB', padding: 10, borderRadius: 8, borderWidth: 1, borderColor: '#FDE68A', marginTop: 8 }}>
+            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#92400E', marginBottom: 2 }}>📦 Contenido oficial de este pack:</Text>
+            <Text style={{ fontSize: 12, color: '#78350F' }}>
+              {monto === '40'
+                ? '• 2kg Arroz, 1L Aceite, 1kg Avena, 1kg Lentejas/Menestras y 1kg Azúcar.'
+                : '• 5kg Arroz, 2L Aceite, 2kg Avena, 2kg Menestras, 2kg Azúcar, 1kg Fideos y 2 tarros de Leche.'}
+            </Text>
+          </View>
+
+          {/* CAMPO DE OBSERVACIONES */}
+          <Text style={[styles.label, { marginTop: 12 }]}>Observaciones (opcional si cambió algún producto por stock):</Text>
+          <TextInput
+            style={styles.input}
+            value={desc}
+            onChangeText={setDesc}
+            placeholder="Ej: Se cambió avena por fideos por falta de stock..."
+          />
                 </View>
 
                 <Text style={styles.label}>Foto de la entrega con el abuelito *:</Text>

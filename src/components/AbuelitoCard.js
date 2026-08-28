@@ -9,7 +9,7 @@ export default function AbuelitoCard({ item, onSelect }) {
     ? `•••••${item.dni.slice(-3)}` 
     : '••••••••';
 
-  const metaMensual = parseFloat(item.meta_mensual || 120);
+  const metaMensual = parseFloat(item.meta_mensual || 462);
   const recaudadoMes = parseFloat(item.recaudado_mes_actual || item.saldo_disponible || 0);
   const porcentaje = Math.min(100, Math.round((recaudadoMes / metaMensual) * 100));
 
