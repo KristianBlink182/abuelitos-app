@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, useWindowDimensions, Platform } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Modal, useWindowDimensions, Platform } from 'react-native';
 import AbuelitoCard from '../components/AbuelitoCard';
 import { ubigeoPeru } from '../utils/ubigeoPeru';
 
@@ -16,6 +16,9 @@ export default function DirectorySearchScreen({ abuelitos = [], onSelectAbuelito
   const [rangoEdad, setRangoEdad] = useState('Todos');
   const [soloUrgentes, setSoloUrgentes] = useState(false);
 
+  // Modales de selección para Móvil
+  const [modalSelector, setModalSelector] = useState(null); // 'dpto', 'prov', 'dist'
+
   const provinciasDisponibles = dpto !== 'Todos' && ubigeoPeru[dpto] 
     ? ['Todos', ...Object.keys(ubigeoPeru[dpto])] 
     : ['Todos'];
@@ -28,11 +31,18 @@ export default function DirectorySearchScreen({ abuelitos = [], onSelectAbuelito
     setDpto(nuevoDpto);
     setProvincia('Todos');
     setDistrito('Todos');
+    setModalSelector(null);
   };
 
   const handleCambioProv = (nuevaProv) => {
     setProvincia(nuevaProv);
     setDistrito('Todos');
+    setModalSelector(null);
+  };
+
+  const handleCambioDist = (nuevoDist) => {
+    setDistrito(nuevoDist);
+    setModalSelector(null);
   };
 
   const limpiarFiltros = () => {
@@ -101,27 +111,55 @@ export default function DirectorySearchScreen({ abuelitos = [], onSelectAbuelito
               onChangeText={setBusqueda} 
             />
 
+            {/* 1. DEPARTAMENTO (COMPATIBLE CON CELULAR Y WEB) */}
             <Text style={styles.label}>1. Departamento:</Text>
-            {Platform.OS === 'web' ? (
+            {Platform.OS === 'web' && esEscritorio ? (
               <select style={styles.selectHtml} value={dpto} onChange={(e) => handleCambioDpto(e.target.value)}>
                 {departamentosDisponibles.map((d) => <option key={d} value={d}>{d === 'Todos' ? '📍 Todos' : d}</option>)}
               </select>
-            ) : null}
+            ) : (
+              <TouchableOpacity style={styles.btnSelectorMovil} onPress={() => setModalSelector('dpto')}>
+                <Text style={styles.btnSelectorMovilText} numberOfLines={1}>
+                  {dpto === 'Todos' ? '📍 Todos los Departamentos' : `📍 ${dpto}`} ▼
+                </Text>
+              </TouchableOpacity>
+            )}
 
+            {/* 2. PROVINCIA (COMPATIBLE CON CELULAR Y WEB) */}
             <Text style={styles.label}>2. Provincia:</Text>
-            {Platform.OS === 'web' ? (
+            {Platform.OS === 'web' && esEscritorio ? (
               <select style={styles.selectHtml} value={provincia} onChange={(e) => handleCambioProv(e.target.value)} disabled={dpto === 'Todos'}>
                 {provinciasDisponibles.map((p) => <option key={p} value={p}>{p === 'Todos' ? 'Todas' : p}</option>)}
               </select>
-            ) : null}
+            ) : (
+              <TouchableOpacity 
+                style={[styles.btnSelectorMovil, dpto === 'Todos' && styles.btnDisabled]} 
+                onPress={() => dpto !== 'Todos' && setModalSelector('prov')}
+              >
+                <Text style={styles.btnSelectorMovilText} numberOfLines={1}>
+                  {provincia === 'Todos' ? 'Todas las Provincias' : provincia} ▼
+                </Text>
+              </TouchableOpacity>
+            )}
 
+            {/* 3. DISTRITO (COMPATIBLE CON CELULAR Y WEB) */}
             <Text style={styles.label}>3. Distrito:</Text>
-            {Platform.OS === 'web' ? (
+            {Platform.OS === 'web' && esEscritorio ? (
               <select style={styles.selectHtml} value={distrito} onChange={(e) => setDistrito(e.target.value)} disabled={provincia === 'Todos'}>
                 {distritosDisponibles.map((dist) => <option key={dist} value={dist}>{dist === 'Todos' ? 'Todos' : dist}</option>)}
               </select>
-            ) : null}
+            ) : (
+              <TouchableOpacity 
+                style={[styles.btnSelectorMovil, provincia === 'Todos' && styles.btnDisabled]} 
+                onPress={() => provincia !== 'Todos' && setModalSelector('dist')}
+              >
+                <Text style={styles.btnSelectorMovilText} numberOfLines={1}>
+                  {distrito === 'Todos' ? 'Todos los Distritos' : distrito} ▼
+                </Text>
+              </TouchableOpacity>
+            )}
 
+            {/* EDAD */}
             <Text style={styles.label}>Rango de Edad:</Text>
             <View style={styles.edadRow}>
               {[
@@ -151,7 +189,7 @@ export default function DirectorySearchScreen({ abuelitos = [], onSelectAbuelito
             </TouchableOpacity>
           </View>
 
-          {/* RESULTADOS: EN COMPUTADORA 3 COLUMNAS, EN CELULAR 1 COLUMNA VERTICAL */}
+          {/* RESULTADOS */}
           <View style={styles.resultsArea}>
             <View style={styles.resultsHeader}>
               <Text style={styles.resultsCount}>
@@ -179,6 +217,47 @@ export default function DirectorySearchScreen({ abuelitos = [], onSelectAbuelito
 
         </View>
       </View>
+
+      {/* MODAL NATIVO TÁCTIL PARA CELULARES */}
+      <Modal visible={!!modalSelector} transparent={true} animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setModalSelector(null)}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalCardTitle}>
+              {modalSelector === 'dpto' ? 'Selecciona un Departamento' : (modalSelector === 'prov' ? 'Selecciona una Provincia' : 'Selecciona un Distrito')}
+            </Text>
+
+            <ScrollView style={{ maxHeight: 350 }}>
+              {modalSelector === 'dpto' && departamentosDisponibles.map((item) => (
+                <TouchableOpacity key={item} style={styles.modalOption} onPress={() => handleCambioDpto(item)}>
+                  <Text style={[styles.modalOptionText, dpto === item && styles.modalOptionTextActive]}>
+                    {item === 'Todos' ? '📍 Todos los Departamentos' : `📍 ${item}`}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+
+              {modalSelector === 'prov' && provinciasDisponibles.map((item) => (
+                <TouchableOpacity key={item} style={styles.modalOption} onPress={() => handleCambioProv(item)}>
+                  <Text style={[styles.modalOptionText, provincia === item && styles.modalOptionTextActive]}>
+                    {item === 'Todos' ? 'Todas las Provincias' : item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+
+              {modalSelector === 'dist' && distritosDisponibles.map((item) => (
+                <TouchableOpacity key={item} style={styles.modalOption} onPress={() => handleCambioDist(item)}>
+                  <Text style={[styles.modalOptionText, distrito === item && styles.modalOptionTextActive]}>
+                    {item === 'Todos' ? 'Todos los Distritos' : item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <TouchableOpacity style={styles.btnCerrarModal} onPress={() => setModalSelector(null)}>
+              <Text style={styles.btnCerrarModalText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 }
@@ -187,9 +266,6 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
   topHeroBanner: {
     backgroundColor: '#0F172A',
-    backgroundImage: Platform.OS === 'web' 
-      ? 'linear-gradient(135deg, #0B0F19 0%, #1E293B 100%)' 
-      : undefined,
     paddingVertical: 30,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
@@ -210,6 +286,9 @@ const styles = StyleSheet.create({
   label: { fontSize: 11, fontWeight: 'bold', color: '#334155', marginTop: 8, marginBottom: 4 },
   input: { borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 8, fontSize: 13, outlineStyle: 'none' },
   selectHtml: { width: '100%', backgroundColor: '#FFF', borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8, padding: 8, fontSize: 13, outline: 'none', cursor: 'pointer' },
+  btnSelectorMovil: { backgroundColor: '#F8FAFC', borderWidth: 1, borderColor: '#CBD5E1', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 },
+  btnSelectorMovilText: { fontSize: 13, fontWeight: 'bold', color: '#1E293B' },
+  btnDisabled: { opacity: 0.5 },
   edadRow: { flexDirection: 'row', gap: 4, marginTop: 4, flexWrap: 'wrap' },
   btnEdad: { flex: 1, minWidth: 45, backgroundColor: '#F1F5F9', paddingVertical: 6, borderRadius: 6, alignItems: 'center', borderWidth: 1, borderColor: '#E2E8F0' },
   btnEdadActive: { backgroundColor: '#FF385C', borderColor: '#FF385C' },
@@ -223,7 +302,6 @@ const styles = StyleSheet.create({
   resultsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   resultsCount: { fontSize: 13, color: '#64748B' },
   grid: { width: '100%' },
-  // 3 COLUMNAS EN COMPUTADORA
   gridDesktop3Cols: {
     display: Platform.OS === 'web' ? 'grid' : 'flex',
     gridTemplateColumns: Platform.OS === 'web' ? 'repeat(3, 1fr)' : undefined,
@@ -231,7 +309,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  // 1 COLUMNA COMPLETA Y VERTICAL EN CELULAR
   gridMovil1Col: {
     flexDirection: 'column',
     alignItems: 'center',
@@ -242,5 +319,13 @@ const styles = StyleSheet.create({
   emptyResultsTitle: { fontSize: 16, fontWeight: 'bold', color: '#0F172A', marginBottom: 4 },
   emptyResultsSub: { fontSize: 13, color: '#64748B', textAlign: 'center', marginBottom: 16 },
   btnReset: { backgroundColor: '#FF385C', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
-  btnResetText: { color: '#FFF', fontWeight: 'bold', fontSize: 13 }
+  btnResetText: { color: '#FFF', fontWeight: 'bold', fontSize: 13 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  modalCard: { backgroundColor: '#FFF', borderRadius: 16, padding: 20, maxWidth: 340, width: '100%' },
+  modalCardTitle: { fontSize: 16, fontWeight: 'bold', color: '#0F172A', marginBottom: 12, textAlign: 'center', borderBottomWidth: 1, borderColor: '#E2E8F0', paddingBottom: 8 },
+  modalOption: { paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, marginVertical: 2 },
+  modalOptionText: { fontSize: 13, color: '#334155', fontWeight: '600' },
+  modalOptionTextActive: { color: '#FF385C', fontWeight: 'bold' },
+  btnCerrarModal: { backgroundColor: '#0F172A', paddingVertical: 10, borderRadius: 8, alignItems: 'center', marginTop: 12 },
+  btnCerrarModalText: { color: '#FFF', fontWeight: 'bold', fontSize: 12 }
 });

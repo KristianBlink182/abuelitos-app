@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, Image, Dimensions, StatusBar } from 'react-native';
 
 const { width, height } = Dimensions.get('screen');
 
 export default function AnimatedSplash({ onFinish }) {
   useEffect(() => {
-    // 4 segundos exactos
+    // Retener la imagen 4 segundos exactos
     const timer = setTimeout(() => {
       onFinish();
     }, 4000);
@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
     zIndex: 9999999,
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 100,
   },
   splashImage: {
     width: '100%',

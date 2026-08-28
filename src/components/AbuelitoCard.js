@@ -19,13 +19,29 @@ export default function AbuelitoCard({ item, onSelect }) {
       onPress={() => onSelect(item)} 
       activeOpacity={0.9}
     >
-      {/* FOTO 100% COMPLETA SIN RECORTAR LA CABEZA */}
-      <View style={styles.imageWrapper}>
-        <Image 
-          source={{ uri: item.foto_url }} 
-          style={styles.gridCardImage}
-          resizeMode={Platform.OS === 'web' ? 'cover' : 'contain'}
-        />
+      {/* FOTO CON ENCUADRE COMPLETO DESDE EL TOPE */}
+      <View style={[styles.imageWrapper, esMovil && styles.imageWrapperMovil]}>
+        {Platform.OS === 'web' && !esMovil ? (
+          <img 
+            src={item.foto_url} 
+            alt={item.nombre_completo}
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'top center',
+              display: 'block'
+            }}
+          />
+        ) : (
+          <Image 
+            source={{ uri: item.foto_url }} 
+            style={styles.gridCardImage}
+            resizeMode="cover"
+          />
+        )}
         
         <View style={styles.locationBadge}>
           <Text style={styles.locationBadgeText} numberOfLines={1}>📍 {item.caserio}, {item.provincia}</Text>
@@ -95,11 +111,12 @@ const styles = StyleSheet.create({
   imageWrapper: {
     position: 'relative',
     width: '100%',
-    height: 250,
+    height: 240,
     backgroundColor: '#0F172A',
-    justifyContent: 'center',
-    alignItems: 'center',
     overflow: 'hidden',
+  },
+  imageWrapperMovil: {
+    height: 280, // Altura amplia para celular para no cortar cabezas ni sombreros
   },
   gridCardImage: {
     width: '100%',
