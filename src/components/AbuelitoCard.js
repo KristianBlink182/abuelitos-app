@@ -109,16 +109,20 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     marginBottom: 16,
   },
-  imageWrapper: {
+ imageWrapper: {
     position: 'relative',
     width: '100%',
-    height: 210,                  // ⭐️ Cambiado de 250 a 210: Proporción idéntica a la Web
-    backgroundColor: '#10172A',
+    height: 240,                  // ⭐️ Alto visible y elegante de la tarjeta
+    backgroundColor: '#0F172A',
     overflow: 'hidden',
   },
   imageNativeIos: {
-    width: '100%',                // ⭐️ Ocupa el 100% exacto (Elimina la barra negra)
-    height: '100%',
+    position: 'absolute',
+    top: 0,                       // ⭐️ Inicia exactamente arriba (Cero franja negra)
+    left: 0,
+    right: 0,
+    width: '100%',
+    height: 460,                  // ⭐️ Altura extendida: Baja el rostro al centro visual de la tarjeta
     resizeMode: 'cover',
   },
   locationBadge: {
