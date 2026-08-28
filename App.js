@@ -77,8 +77,12 @@ export default function App() {
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
   };
 
-  const handleSelectAbuelito = (item) => {
-    setSelectedAbuelito(item);
+ const handleSelectAbuelito = (item) => {
+    // Busca la ficha completa del abuelito para que tenga todas sus fotos reales y datos
+    const targetId = item.abuelito_id || item.id;
+    const abuelitoCompleto = abuelitos.find(a => a.id === targetId) || item;
+    
+    setSelectedAbuelito(abuelitoCompleto);
     setCurrentView('detail');
     setTimeout(() => {
       scrollViewRef.current?.scrollTo({ y: 0, animated: false });

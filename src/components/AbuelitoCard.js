@@ -5,12 +5,10 @@ export default function AbuelitoCard({ item, onSelect }) {
   const { width } = useWindowDimensions();
   const esMovil = width <= 768;
 
-  // 1. DNI PROTEGIDO CON ASTERISCOS (Solo muestra los 3 últimos dígitos)
   const dniProtegido = item.dni && item.dni.length >= 4 
     ? `•••••${item.dni.slice(-3)}` 
     : '••••••••';
 
-  // 2. META MENSUAL QUE SE REINICIA SOLA
   const metaMensual = parseFloat(item.meta_mensual || 120);
   const recaudadoMes = parseFloat(item.recaudado_mes_actual || item.saldo_disponible || 0);
   const porcentaje = Math.min(100, Math.round((recaudadoMes / metaMensual) * 100));
@@ -21,22 +19,13 @@ export default function AbuelitoCard({ item, onSelect }) {
       onPress={() => onSelect(item)} 
       activeOpacity={0.9}
     >
+      {/* FOTO CON ENCUADRE FORZADO EN LA CABEZA Y CARA */}
       <View style={styles.imageWrapper}>
-        {Platform.OS === 'web' ? (
-          <img 
-            src={item.foto_url} 
-            alt={item.nombre_completo}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'top center',
-              display: 'block'
-            }}
-          />
-        ) : (
-          <Image source={{ uri: item.foto_url }} style={styles.gridCardImage} />
-        )}
+        <Image 
+          source={{ uri: item.foto_url }} 
+          style={styles.gridCardImage}
+          resizeMode="cover"
+        />
         
         <View style={styles.locationBadge}>
           <Text style={styles.locationBadgeText} numberOfLines={1}>📍 {item.caserio}, {item.provincia}</Text>
@@ -49,15 +38,13 @@ export default function AbuelitoCard({ item, onSelect }) {
 
       <View style={styles.gridCardContent}>
         <Text style={styles.cardTitle} numberOfLines={1}>{item.nombre_completo}</Text>
-        
-        {/* DNI CENSURADO POR SEGURIDAD */}
         <Text style={styles.cardAge}>Edad: {item.edad} años | DNI: {dniProtegido}</Text>
 
         <Text style={styles.cardStory} numberOfLines={2}>
           {item.dolencias_salud || item.historia_biografia}
         </Text>
 
-        {/* BARRA DE APOYO DEL MES ACTUAL */}
+        {/* TERMÓMETRO */}
         <View style={styles.progressContainer}>
           <View style={styles.progressHead}>
             <Text style={styles.progressLabel}>Canasta de este Mes:</Text>
@@ -108,14 +95,13 @@ const styles = StyleSheet.create({
   imageWrapper: {
     position: 'relative',
     width: '100%',
-    height: 240,
+    height: 250,
     backgroundColor: '#0F172A',
     overflow: 'hidden',
   },
   gridCardImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   locationBadge: {
     position: 'absolute',

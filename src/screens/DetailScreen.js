@@ -36,7 +36,7 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
     setEsFavorito(res.esFavorito);
   };
 
-  const fotoMostrar = abuelito.foto_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600';
+  const fotoMostrar = abuelito.foto_url || '';
 
   return (
     <View style={[styles.detailWrapper, esMovil && styles.detailWrapperMovil]}>
