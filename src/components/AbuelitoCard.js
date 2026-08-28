@@ -19,12 +19,12 @@ export default function AbuelitoCard({ item, onSelect }) {
       onPress={() => onSelect(item)} 
       activeOpacity={0.9}
     >
-      {/* FOTO CON ENCUADRE FORZADO EN LA CABEZA Y CARA */}
+      {/* FOTO 100% COMPLETA SIN RECORTAR LA CABEZA */}
       <View style={styles.imageWrapper}>
         <Image 
           source={{ uri: item.foto_url }} 
           style={styles.gridCardImage}
-          resizeMode="cover"
+          resizeMode={Platform.OS === 'web' ? 'cover' : 'contain'}
         />
         
         <View style={styles.locationBadge}>
@@ -97,6 +97,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 250,
     backgroundColor: '#0F172A',
+    justifyContent: 'center',
+    alignItems: 'center',
     overflow: 'hidden',
   },
   gridCardImage: {

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, ScrollView, SafeAreaView, useWindowDimensions, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SplashScreen from 'expo-splash-screen';
+import AnimatedSplash from './src/components/AnimatedSplash';
 import Navbar from './src/components/Navbar';
 import MobileHeader from './src/components/MobileHeader';
 import BottomTabBar from './src/components/BottomTabBar';
@@ -23,6 +25,9 @@ import Footer from './src/components/Footer';
 import AuthModal from './src/components/AuthModal';
 import { getAbuelitos } from './src/services/api';
 
+// 1. OBLIGAR A IOS A MANTENER EL SPLASH SCREEN
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
@@ -34,6 +39,8 @@ if (Platform.OS === 'web' && typeof document !== 'undefined') {
 }
 
 export default function App() {
+  const [mostrarSplash, setMostrarSplash] = useState(true);
+
   const { width } = useWindowDimensions();
   const esEscritorio = width > 768;
   const scrollViewRef = useRef(null);
@@ -49,6 +56,16 @@ export default function App() {
 
   useEffect(() => {
     cargarDatosYSesion();
+
+    // 2. RETENER 4 SEGUNDOS EXACTOS ANTES DE DESVANECER
+    const timerSplash = setTimeout(async () => {
+      try {
+        await SplashScreen.hideAsync();
+      } catch (e) {}
+      setMostrarSplash(false);
+    }, 4000);
+
+    return () => clearTimeout(timerSplash);
   }, []);
 
   const cargarDatosYSesion = async () => {
@@ -77,8 +94,7 @@ export default function App() {
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
   };
 
- const handleSelectAbuelito = (item) => {
-    // Busca la ficha completa del abuelito para que tenga todas sus fotos reales y datos
+  const handleSelectAbuelito = (item) => {
     const targetId = item.abuelito_id || item.id;
     const abuelitoCompleto = abuelitos.find(a => a.id === targetId) || item;
     
@@ -106,6 +122,12 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.mainContainer}>
+
+        {/* SPLASH SCREEN DE 4 SEGUNDOS */}
+        {mostrarSplash && (
+          <AnimatedSplash onFinish={() => setMostrarSplash(false)} />
+        )}
+
         {esEscritorio ? (
           <Navbar 
             onNavigate={handleNavigate} 
