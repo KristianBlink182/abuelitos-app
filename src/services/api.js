@@ -4,11 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // 🌐 TU API OFICIAL EN PRODUCCIÓN (PARA LA WEB Y PARA EL IPHONE)
 export const API_URL = 'https://abuelitos.pe/api';
 
-// 1. Configuración de URL (Web usa localhost, Celulares usan el túnel seguro)
-export const API_URL = Platform.OS === 'web' 
-  ? 'http://localhost:3000/api' 
-  : 'https://redsolidaria-peru.loca.lt/api';
-
 // ========================================================
 // MÓDULO 1: DIRECTORIO PÚBLICO Y DETALLES DE ABUELITOS
 // ========================================================
