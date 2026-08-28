@@ -15,10 +15,11 @@ export default function HeroBanner({
   const departamentosDisponibles = ['Todos', ...Object.keys(ubigeoPeru)];
   const [modalDptoVisible, setModalDptoVisible] = useState(false);
 
+  // ESTADO INICIAL LIMPIO (SIN FOTOS VIEJAS)
   const [heroData, setHeroData] = useState({
     tagline: 'CONECTANDO CORAZONES, TRANSFORMANDO VIDAS:',
     titulo: 'Apadrina una Sonrisa en el Perú Profundo',
-    foto_banner_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200',
+    foto_banner_url: '',
     color_fondo: '#0F172A'
   });
 
@@ -28,7 +29,7 @@ export default function HeroBanner({
 
   const cargarConfiguracion = async () => {
     const data = await getHeroConfig();
-    if (data && data.titulo) {
+    if (data && data.foto_banner_url) {
       setHeroData(data);
     }
   };
@@ -51,7 +52,7 @@ export default function HeroBanner({
 
       <View style={styles.heroContainer}>
         
-        {/* TEXTOS Y BUSCADOR */}
+        {/* COLUMNA IZQUIERDA: TEXTOS Y BUSCADOR */}
         <View style={[styles.colText, esMovil && styles.colTextMovil]}>
           <View style={[styles.taglineBadge, esMovil && styles.taglineBadgeMovil]}>
             <Text style={styles.tagline}>{heroData.tagline}</Text>
@@ -59,10 +60,8 @@ export default function HeroBanner({
           
           <Text style={[styles.title, esMovil && styles.titleMovil]}>{heroData.titulo}</Text>
 
-          {/* BARRA DE BÚSQUEDA CON DEGRADADO CÁLIDO Y CRISTAL */}
+          {/* BUSCADOR */}
           <View style={[styles.searchBar, esMovil && styles.searchBarMovil]}>
-            
-            {/* SELECTOR DE DEPARTAMENTO */}
             <TouchableOpacity 
               style={[styles.btnSelectDpto, esMovil && styles.btnSelectDptoMovil]} 
               onPress={() => setModalDptoVisible(true)}
@@ -81,7 +80,7 @@ export default function HeroBanner({
               onSubmitEditing={handleBuscarClick}
             />
 
-            <TouchableOpacity style={[styles.btnBuscar, esMovil && styles.btnBuscarMovil]} activeOpacity={0.85} onPress={handleBuscarClick}>
+            <TouchableOpacity style={styles.btnBuscar} activeOpacity={0.85} onPress={handleBuscarClick}>
               <Text style={styles.btnBuscarText}>🔍 Buscar</Text>
             </TouchableOpacity>
           </View>
@@ -103,15 +102,31 @@ export default function HeroBanner({
           </View>
         </View>
 
-        {/* FOTO DEL ABUELITO (SOLO EN COMPUTADORAS) */}
-        {!esMovil && (
+        {/* FOTO DEL ABUELITO (SOLO SE MUESTRA CUANDO CARGA DE LA BASE DE DATOS) */}
+        {!esMovil && heroData.foto_banner_url ? (
           <View style={styles.colImage}>
-            <Image 
-              source={{ uri: heroData.foto_banner_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200' }} 
-              style={styles.abuelitoImg} 
-            />
+            {Platform.OS === 'web' ? (
+              <img 
+                src={heroData.foto_banner_url} 
+                alt="Abuelito Perú"
+                referrerPolicy="no-referrer"
+                crossOrigin="anonymous"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 22,
+                  objectFit: 'cover',
+                  border: '1px solid #334155'
+                }}
+              />
+            ) : (
+              <Image 
+                source={{ uri: heroData.foto_banner_url }} 
+                style={styles.abuelitoImg} 
+              />
+            )}
           </View>
-        )}
+        ) : null}
 
       </View>
 
@@ -235,13 +250,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
   },
-  // BARRA DE BÚSQUEDA CON DEGRADADO CÁLIDO
   searchBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFDF9',
-    backgroundImage: Platform.OS === 'web' 
-      ? 'linear-gradient(135deg, #FFFFFF 0%, #FFFDF7 100%)' 
-      : undefined,
     borderRadius: 30,
     padding: 4,
     alignItems: 'center',
