@@ -118,14 +118,14 @@ useEffect(() => {
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
   };
 
+ // ⭐️ Si el Splash está activo, se muestra a pantalla completa 100% (Sin barra blanca)
+  if (mostrarSplash) {
+    return <AnimatedSplash onFinish={() => setMostrarSplash(false)} />;
+  }
+
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.mainContainer}>
-
-        {/* SPLASH SCREEN DE 4 SEGUNDOS */}
-        {mostrarSplash && (
-          <AnimatedSplash onFinish={() => setMostrarSplash(false)} />
-        )}
 
         {esEscritorio ? (
           <Navbar 

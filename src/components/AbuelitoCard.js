@@ -112,18 +112,13 @@ const styles = StyleSheet.create({
   imageWrapper: {
     position: 'relative',
     width: '100%',
-    height: 250,
-    backgroundColor: '#0F172A',
+    height: 210,                  // ⭐️ Cambiado de 250 a 210: Proporción idéntica a la Web
+    backgroundColor: '#10172A',
     overflow: 'hidden',
   },
-  // ANCLAJE SUPERIOR PARA IPHONE: Desplaza hacia abajo para revelar rostro, sombrero y frente
   imageNativeIos: {
-    position: 'absolute',
-    top: 25,                      // ⭐️ Baja la imagen 25px para que la cabeza/ojos entren completos
-    left: 0,
-    right: 0,
-    width: '100%',
-    height: 270,                  // ⭐️ Cubre todo el alto sin desbordar por arriba
+    width: '100%',                // ⭐️ Ocupa el 100% exacto (Elimina la barra negra)
+    height: '100%',
     resizeMode: 'cover',
   },
   locationBadge: {
