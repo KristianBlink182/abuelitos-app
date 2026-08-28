@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, useWindowDimensions, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Linking, useWindowDimensions, Platform } from 'react-native';
 import GallerySection from '../components/GallerySection';
 import MapSection from '../components/MapSection';
 import BodegaSidebar from '../components/BodegaSidebar';
@@ -36,10 +36,12 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
     setEsFavorito(res.esFavorito);
   };
 
+  const fotoMostrar = abuelito.foto_url || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600';
+
   return (
     <View style={[styles.detailWrapper, esMovil && styles.detailWrapperMovil]}>
       
-      {/* BOTONES SUPERIORES EN LA WEB: SOLO VOLVER, GUARDAR Y COMPARTIR */}
+      {/* BOTONES SUPERIORES EN WEB */}
       {!esMovil && (
         <View style={styles.topActions}>
           <TouchableOpacity style={styles.btnVolver} onPress={onBack}>
@@ -52,31 +54,15 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.btnShareWs} onPress={() => setShareModalOpen(true)}>
-              <Text style={styles.btnShareWsText}>📢 Compartir en Redes</Text>
+              <Text style={styles.btnShareWsText}>📢 Compartir</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
 
-      {/* HEADER BANNER */}
+      {/* HEADER BANNER 100% NATIVO PARA IOS Y ANDROID */}
       <View style={[styles.detailBanner, esMovil && styles.detailBannerMovil]}>
-        {Platform.OS === 'web' ? (
-          <img 
-            src={abuelito.foto_url} 
-            alt={abuelito.nombre_completo}
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'top center',
-              filter: 'brightness(0.7)'
-            }}
-          />
-        ) : (
-          <Image source={{ uri: abuelito.foto_url }} style={styles.detailBannerImage} />
-        )}
-
+        <Image source={{ uri: fotoMostrar }} style={styles.detailBannerImage} />
         <View style={styles.bannerOverlay} />
 
         {esMovil && (
@@ -92,8 +78,8 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
         )}
         
         <View style={[styles.detailHeaderInfo, esMovil && styles.detailHeaderInfoMovil]}>
-          <TouchableOpacity onPress={() => setFotoZoomUrl(abuelito.foto_url)} activeOpacity={0.8}>
-            <Image source={{ uri: abuelito.foto_url }} style={[styles.avatarImg, esMovil && styles.avatarImgMovil]} />
+          <TouchableOpacity onPress={() => setFotoZoomUrl(fotoMostrar)} activeOpacity={0.8}>
+            <Image source={{ uri: fotoMostrar }} style={[styles.avatarImg, esMovil && styles.avatarImgMovil]} />
             <View style={styles.badgeZoom}><Text style={styles.badgeZoomText}>🔍 Ampliar</Text></View>
           </TouchableOpacity>
 
@@ -149,6 +135,7 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
             </Text>
           </View>
 
+          {/* CAJA DE DONACIÓN DIRECTA */}
           <View style={{ marginBottom: 20 }}>
             <BodegaSidebar 
               abuelito={abuelito} 
@@ -220,7 +207,7 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
         </View>
       )}
 
-      {/* POPUPS */}
+      {/* POPUPS SEGUROS */}
       <ShareSocialModal 
         visible={shareModalOpen}
         abuelito={abuelito}

@@ -1,8 +1,15 @@
 import React from 'react';
-import { StyleSheet, View, Text, Modal, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, View, Text, Modal, TouchableOpacity, Linking, Platform } from 'react-native';
 
 export default function VideoPlayerModal({ visible, videoUrl, abuelitoNombre, onClose }) {
   if (!visible || !videoUrl) return null;
+
+  // En iPhone abre directamente el reproductor de video nativo del sistema
+  if (Platform.OS !== 'web') {
+    Linking.openURL(videoUrl);
+    onClose();
+    return null;
+  }
 
   return (
     <Modal visible={visible} transparent={true} animationType="fade">
@@ -13,31 +20,26 @@ export default function VideoPlayerModal({ visible, videoUrl, abuelitoNombre, on
 
         <View style={styles.videoCard}>
           <View style={styles.videoHeader}>
-            <Text style={styles.badgeLive}>🔴 TESTIMONIO EN VIVO</Text>
+            <Text style={styles.badgeLive}>🔴 TESTIMONIO</Text>
             <Text style={styles.videoTitle}>Palabras de {abuelitoNombre}</Text>
           </View>
 
-          {/* REPRODUCTOR HTML5 EN WEB */}
-          {Platform.OS === 'web' ? (
-            <video 
-              src={videoUrl} 
-              controls 
-              autoPlay 
-              playsInline
-              style={{
-                width: '100%',
-                maxHeight: '65vh',
-                borderRadius: 12,
-                backgroundColor: '#000',
-                outline: 'none'
-              }}
-            />
-          ) : (
-            <Text style={{ color: '#FFF', textAlign: 'center', padding: 20 }}>Reproduciendo video...</Text>
-          )}
+          <video 
+            src={videoUrl} 
+            controls 
+            autoPlay 
+            playsInline
+            style={{
+              width: '100%',
+              maxHeight: '65vh',
+              borderRadius: 12,
+              backgroundColor: '#000',
+              outline: 'none'
+            }}
+          />
 
           <Text style={styles.videoFooter}>
-            * Video grabado por la Autoridad Comunal para corroboración de identidad y estado de salud.
+            * Video grabado por la Autoridad Comunal para corroboración de identidad.
           </Text>
         </View>
       </View>
