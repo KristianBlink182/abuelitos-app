@@ -118,11 +118,10 @@ useEffect(() => {
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
   };
 
- // ⭐️ Si el Splash está activo, se muestra a pantalla completa 100% (Sin barra blanca)
-  if (mostrarSplash) {
-    return <AnimatedSplash onFinish={() => setMostrarSplash(false)} />;
-  }
-
+ // ⭐ El Splash SOLO se muestra en iPhone/Android, en la Web NUNCA:
+if (Platform.OS !== 'web' && mostrarSplash) {
+  return <AnimatedSplash onFinish={() => setMostrarSplash(false)} />;
+}
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.mainContainer}>

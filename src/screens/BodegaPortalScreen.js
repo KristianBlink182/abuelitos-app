@@ -4,8 +4,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { loginBodega, getAbuelitosBodega, entregarCanastaBodega } from '../services/api';
 
 export default function BodegaPortalScreen() {
-  const [usuarioInput, setUsuarioInput] = useState('bodega_huayllay');
-  const [passwordInput, setPasswordInput] = useState('123');
+  const [usuarioInput, setUsuarioInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
   const [bodegaActiva, setBodegaActiva] = useState(null);
   const [abuelitos, setAbuelitos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -135,44 +135,80 @@ export default function BodegaPortalScreen() {
               </View>
             )}
 
-            {/* MODAL DE ENTREGA */}
+           {/* MODAL DE ENTREGA */}
             {selectedAbuelito && (
               <View style={styles.despachoCard}>
                 <Text style={styles.despachoTitle}>📦 Despachar Canasta a {selectedAbuelito.nombre_completo}</Text>
-                
-                <Text style={styles.label}>Selecciona el Pack de Canasta:</Text>
-                <View style={styles.packRow}>
-                 {/* CONTENIDO FIJO DEL PACK SELECCIONADO */}
-          <View style={{ backgroundColor: '#FFFBEB', padding: 10, borderRadius: 8, borderWidth: 1, borderColor: '#FDE68A', marginTop: 8 }}>
-            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#92400E', marginBottom: 2 }}>📦 Contenido oficial de este pack:</Text>
-            <Text style={{ fontSize: 12, color: '#78350F' }}>
-              {monto === '40'
-                ? '• 2kg Arroz, 1L Aceite, 1kg Avena, 1kg Lentejas/Menestras y 1kg Azúcar.'
-                : '• 5kg Arroz, 2L Aceite, 2kg Avena, 2kg Menestras, 2kg Azúcar, 1kg Fideos y 2 tarros de Leche.'}
-            </Text>
-          </View>
 
-          {/* CAMPO DE OBSERVACIONES */}
-          <Text style={[styles.label, { marginTop: 12 }]}>Observaciones (opcional si cambió algún producto por stock):</Text>
-          <TextInput
-            style={styles.input}
-            value={desc}
-            onChangeText={setDesc}
-            placeholder="Ej: Se cambió avena por fideos por falta de stock..."
-          />
+                {/* 1. BOTONES DE SELECCIÓN DE CANASTA */}
+                <Text style={styles.label}>Selecciona el Tipo de Canasta:</Text>
+                <View style={styles.packRow}>
+                  <TouchableOpacity
+                    style={[styles.btnPack, monto === '40' && styles.btnPackActive]}
+                    onPress={() => {
+                      setMonto('40');
+                      setTipoCanasta('Canasta Básica 5 Días (S/ 40)');
+                    }}
+                  >
+                    <Text style={[styles.packText, monto === '40' && styles.packTextActive]}>
+                      🧺 Canasta Básica 5 Días (S/ 40)
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.btnPack, monto === '80' && styles.btnPackActive]}
+                    onPress={() => {
+                      setMonto('80');
+                      setTipoCanasta('Canasta Quincenal (S/ 80)');
+                    }}
+                  >
+                    <Text style={[styles.packText, monto === '80' && styles.packTextActive]}>
+                      🧺 Canasta Quincenal (S/ 80)
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
-                <Text style={styles.label}>Foto de la entrega con el abuelito *:</Text>
+                {/* 2. CONTENIDO DETALLADO DE LA CANASTA SELECCIONADA */}
+                <View style={{ backgroundColor: '#FFFBEB', padding: 12, borderRadius: 8, borderWidth: 1, borderColor: '#FDE68A', marginVertical: 10 }}>
+                  <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#92400E', marginBottom: 4 }}>
+                    📦 Contenido que debes entregar ({monto === '40' ? 'Básica 5 Días' : 'Quincenal'}):
+                  </Text>
+                  <Text style={{ fontSize: 13, color: '#78350F', lineHeight: 18 }}>
+                    {monto === '40'
+                      ? '• 2kg Arroz, 1L Aceite, 1kg Avena, 1kg Lentejas/Menestras y 1kg Azúcar.'
+                      : '• 5kg Arroz, 2L Aceite, 2kg Avena, 2kg Menestras, 2kg Azúcar, 1kg Fideos y 2 tarros de Leche.'}
+                  </Text>
+                </View>
+
+                {/* 3. FOTO DE ENTREGA */}
+                <Text style={[styles.label, { marginTop: 10 }]}>Foto de la entrega con el abuelito *:</Text>
                 <TouchableOpacity style={styles.btnFoto} onPress={pickImage}>
                   <Text style={styles.btnFotoText}>{foto ? '✓ Foto de Constancia Lista' : '📷 Tomar Foto de la Entrega'}</Text>
                 </TouchableOpacity>
                 {foto && <Image source={{ uri: foto.uri }} style={styles.preview} />}
 
-                <Text style={styles.label}>Detalle de productos entregados:</Text>
-                <TextInput style={styles.input} value={desc} onChangeText={setDesc} />
+                {/* 4. CAMBIO DE PRODUCTOS */}
+                <Text style={[styles.label, { marginTop: 14 }]}>Cambio de Productos:</Text>
+                <TextInput
+                  style={styles.input}
+                  value={desc}
+                  onChangeText={setDesc}
+                  placeholder="Si faltó algún producto en la bodega, escribe aquí por cuál se reemplazó..."
+                />
 
-                <TouchableOpacity style={styles.btnConfirmarDespacho} onPress={handleEntregar} disabled={loading}>
-                  {loading ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnConfirmarDespachoText}>Descontar S/ {monto} y Guardar Constancia</Text>}
+                {/* 5. BOTÓN DE CONFIRMACIÓN */}
+                <TouchableOpacity
+                  style={styles.btnConfirmarDespacho}
+                  onPress={handleEntregar}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.btnConfirmarDespachoText}>
+                      Descontar S/ {monto} y Guardar Constancia
+                    </Text>
+                  )}
                 </TouchableOpacity>
               </View>
             )}
