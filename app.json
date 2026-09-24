@@ -13,7 +13,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "pe.abuelitos.app"
+      "bundleIdentifier": "pe.abuelitos.app",
+      "buildNumber": "45"
     },
     "android": {
       "adaptiveIcon": {
