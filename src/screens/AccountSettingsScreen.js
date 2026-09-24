@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator, Alert, Linking } from 'react-native';
 import { cambiarPasswordDonante, getMisDonaciones } from '../services/api';
 
 export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, onCerrarSesion, onOpenAuth }) {
@@ -10,7 +10,7 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
 
   const nombreUsuario = usuario?.nombre_completo || usuario?.nombre || 'Donante Solidario';
   const emailUsuario = usuario?.email || 'Sin correo';
-  const iniciales = nombreUsuario.trim().substring(0, 2).toUpperCase();
+  const iniciales = nombreUsuario ? nombreUsuario.trim().substring(0, 2).toUpperCase() : 'DS';
 
   useEffect(() => {
     if (usuario && usuario.id) {
@@ -28,8 +28,8 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
   };
 
   const handleCambiarPassword = async () => {
-    if (!passwordNueva.trim() || passwordNueva.length < 4) {
-      alert('La nueva contraseña debe tener al menos 4 caracteres.');
+    if (!passwordNueva || passwordNueva.trim().length < 4) {
+      Alert.alert('Atención', 'La nueva contraseña debe tener al menos 4 caracteres.');
       return;
     }
 
@@ -38,11 +38,25 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
     setGuardandoPass(false);
 
     if (res.success) {
-      alert('✅ ¡Contraseña actualizada exitosamente!');
+      Alert.alert('Éxito', '¡Contraseña actualizada exitosamente!');
       setPasswordNueva('');
     } else {
-      alert(res.error || 'Error al actualizar contraseña.');
+      Alert.alert('Error', res.error || 'Error al actualizar contraseña.');
     }
+  };
+
+  const handleSolicitarEliminarCuenta = () => {
+    Alert.alert(
+      "Eliminación de Cuenta",
+      "Serás redirigido a nuestro formulario oficial para procesar la baja definitiva de tu cuenta y datos personales.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Continuar", 
+          onPress: () => Linking.openURL('https://abuelitos.pe/contacto') 
+        }
+      ]
+    );
   };
 
   if (!usuario || !usuario.id) {
@@ -82,16 +96,24 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
           <Text style={styles.boxTitle}>🔒 Seguridad y Contraseña</Text>
           <Text style={styles.boxSub}>Actualiza tu clave de acceso a abuelitos.pe:</Text>
           
-          <TextInput 
-            style={styles.input} 
-            placeholder="Nueva contraseña (mínimo 4 caracteres)" 
+          <TextInput
+            style={styles.input}
+            placeholder="Nueva contraseña (mínimo 4 caracteres)"
             secureTextEntry
             value={passwordNueva}
             onChangeText={setPasswordNueva}
           />
-
-          <TouchableOpacity style={styles.btnGuardarPass} onPress={handleCambiarPassword} disabled={guardandoPass}>
-            {guardandoPass ? <ActivityIndicator color="#FFF" /> : <Text style={styles.btnGuardarPassText}>Actualizar Contraseña</Text>}
+          
+          <TouchableOpacity 
+            style={styles.btnGuardarPass} 
+            onPress={handleCambiarPassword}
+            disabled={guardandoPass}
+          >
+            {guardandoPass ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.btnGuardarPassText}>Actualizar Contraseña</Text>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -128,6 +150,21 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
           )}
         </View>
 
+        {/* 3. SOLICITUD DE ELIMINACIÓN DE CUENTA (APPLE GUIDELINE 5.1.1) */}
+        <View style={[styles.boxCard, { backgroundColor: '#FFF5F5', borderColor: '#FEE2E2', alignItems: 'center' }]}>
+          <Text style={[styles.boxTitle, { color: '#991B1B', fontSize: 14 }]}>Zona de Cuenta y Privacidad</Text>
+          <Text style={[styles.boxSub, { textAlign: 'center', marginBottom: 12 }]}>
+            Conforme a nuestras políticas de privacidad, puedes solicitar la baja permanente de tu cuenta y la eliminación de tus datos asociados:
+          </Text>
+          <TouchableOpacity 
+            style={{ backgroundColor: '#EF4444', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}
+            onPress={handleSolicitarEliminarCuenta}
+            activeOpacity={0.85}
+          >
+            <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 13 }}>Solicitar Eliminación de Cuenta</Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
     </ScrollView>
   );
@@ -136,7 +173,7 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC', padding: 16 },
   wrapper: { maxWidth: 800, alignSelf: 'center', width: '100%' },
-  profileCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 18, borderRadius: 16, borderWidth: 1, borderColor: '#E2E8F0', alignItems: 'center', gap: 14, marginBottom: 18, flexWrap: 'wrap' },
+  profileCard: { flexDirection: 'row', backgroundColor: '#FFF', padding: 18, borderRadius: 16, borderWidth: 1, borderColor: '#E2E8F0', alignItems: 'center', gap: 14, marginBottom: 16, flexWrap: 'wrap' },
   avatarBig: { width: 52, height: 52, borderRadius: 26, backgroundColor: '#0F172A', justifyContent: 'center', alignItems: 'center' },
   avatarBigText: { color: '#FFF', fontSize: 18, fontWeight: '900' },
   userName: { fontSize: 17, fontWeight: '900', color: '#1E293B' },
