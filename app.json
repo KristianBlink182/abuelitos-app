@@ -2,7 +2,7 @@
   "expo": {
     "name": "Abuelitos Perú",
     "slug": "frontendabuelitos",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "pe.abuelitos.app",
-      "buildNumber": "46"
+      "buildNumber": "47"
     },
     "android": {
       "adaptiveIcon": {
