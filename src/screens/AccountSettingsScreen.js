@@ -47,13 +47,23 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
 
   const handleSolicitarEliminarCuenta = () => {
     Alert.alert(
-      "Eliminación de Cuenta",
-      "Serás redirigido a nuestro formulario oficial para procesar la baja definitiva de tu cuenta y datos personales.",
+      "Eliminar Cuenta",
+      "¿Estás seguro de que deseas eliminar tu cuenta permanentemente? Se perderán todos tus datos de acceso.",
       [
         { text: "Cancelar", style: "cancel" },
         { 
-          text: "Continuar", 
-          onPress: () => Linking.openURL('https://abuelitos.pe/contacto') 
+          text: "Sí, Eliminar", 
+          style: "destructive",
+          onPress: async () => {
+            // Llama a la API que ya creamos en el backend
+            try {
+              await fetch('https://abuelitos.pe/api/donante/eliminar-cuenta/' + usuario.id, { method: 'DELETE' });
+              Alert.alert("Éxito", "Tu cuenta ha sido eliminada.");
+              if (onCerrarSesion) onCerrarSesion();
+            } catch (e) {
+              if (onCerrarSesion) onCerrarSesion();
+            }
+          }
         }
       ]
     );
@@ -164,7 +174,18 @@ export default function AccountSettingsScreen({ usuario = {}, onSelectAbuelito, 
             <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 13 }}>Solicitar Eliminación de Cuenta</Text>
           </TouchableOpacity>
         </View>
-
+{/* SELLO DE DESARROLLO MktIA */}
+        <View style={{ alignItems: 'center', marginTop: 24, marginBottom: 20 }}>
+          <Text style={{ fontSize: 13, color: '#64748B' }}>
+            Desarrollado con ❤️ por{' '}
+            <Text 
+              style={{ color: '#2563EB', fontWeight: 'bold', textDecorationLine: 'underline' }}
+              onPress={() => Linking.openURL('https://www.mktia.pe')}
+            >
+              MktIA
+            </Text>
+          </Text>
+        </View>
       </View>
     </ScrollView>
   );
