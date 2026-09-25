@@ -47,6 +47,18 @@ export default function App() {
   const [usuarioSesion, setUsuarioSesion] = useState(null);
   const [modalAuthVisible, setModalAuthVisible] = useState(false);
 
+  // Splash animado de 4 segundos (EXCLUSIVO PARA LA APP MÓVIL, CERO EN WEB)
+  const [mostrarSplash, setMostrarSplash] = useState(Platform.OS !== 'web');
+
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      const timer = setTimeout(() => {
+        setMostrarSplash(false);
+      }, 4000); // 4 Segundos exactos
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   useEffect(() => {
     cargarDatosYSesion();
   }, []);
@@ -98,7 +110,17 @@ export default function App() {
     setCurrentView('directory_search');
     scrollViewRef.current?.scrollTo({ y: 0, animated: false });
   };
-
+if (mostrarSplash && Platform.OS !== 'web') {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#000000' }}>
+        <Image 
+          source={require('./assets/splash.jpg')} // O './assets/splash.jpg' según la extensión de tu archivo
+          style={{ width: '100%', height: '100%' }} 
+          resizeMode="cover"
+        />
+      </View>
+    );
+  }
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.mainContainer}>
