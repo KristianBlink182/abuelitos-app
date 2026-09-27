@@ -113,7 +113,7 @@ if (mostrarSplash && Platform.OS !== 'web') {
     return (
       <View style={{ flex: 1, backgroundColor: '#000000', justifyContent: 'center', alignItems: 'center' }}>
         <Image 
-          source={require('./assets/splash.jpg')} 
+          source={require('./assets/splash.png')} 
           style={{ width: '100%', height: '100%' }} 
           resizeMode="cover"
         />
