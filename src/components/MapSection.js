@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Linking, Platform } from 'react-native';
 
 export default function MapSection({ distrito, provincia, departamento, caserio }) {
   const queryMaps = encodeURIComponent(`${distrito || ''}, ${provincia || ''}, ${departamento || ''}, Peru`);
@@ -10,16 +10,16 @@ export default function MapSection({ distrito, provincia, departamento, caserio 
       {/* CABECERA COMPACTA QUE NO SE DESBORDA */}
       <View style={styles.headRow}>
         <View style={{ flex: 1, marginRight: 8 }}>
-          <Text style={styles.boxTitle}>🗺️ Ubicación y Cómo Llegar</Text>
+          <Text style={styles.boxTitle}>Ubicación y Cómo Llegar</Text>
           <Text style={styles.mapSubtitle} numberOfLines={1}>Ruta de acceso hacia el caserío:</Text>
         </View>
         <TouchableOpacity style={styles.btnAbrirMaps} onPress={() => Linking.openURL(urlGoogleMapsDirecto)} activeOpacity={0.85}>
-          <Text style={styles.btnAbrirMapsText}>📍 Abrir Maps ↗</Text>
+          <Text style={styles.btnAbrirMapsText}>Abrir Maps ↗</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.mapContainer}>
-        {typeof window !== 'undefined' ? (
+        {Platform.OS === 'web' && typeof document !== 'undefined' ? (
           <iframe
             title="Mapa de Acceso"
             width="100%"
@@ -30,16 +30,28 @@ export default function MapSection({ distrito, provincia, departamento, caserio 
             style={{ borderRadius: 10, border: 'none' }}
           />
         ) : (
-          <Text style={{ textAlign: 'center', padding: 20 }}>📍 {distrito} - {provincia} ({departamento})</Text>
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 20 }}>
+            <Text style={{ fontSize: 13, color: '#475569', marginBottom: 12, textAlign: 'center' }}>
+              📍 {distrito} - {provincia} ({departamento})
+            </Text>
+            <TouchableOpacity 
+              style={{ backgroundColor: '#0F172A', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8 }}
+              onPress={() => Linking.openURL(urlGoogleMapsDirecto)}
+            >
+              <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 12 }}>
+                🗺️ Ver Ruta en Google Maps
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
       <View style={styles.locBadge}>
         <Text style={styles.locNote}>
-          🏡 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Caserío:</Text> {caserio}.
+          <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Caserío: </Text>{caserio}.
         </Text>
         <Text style={styles.locSubNote}>
-          🚗 <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Acceso:</Text> Llegar a la Plaza de {distrito} y tomar movilidad rural al {caserio}.
+          <Text style={{ fontWeight: 'bold', color: '#0F172A' }}>Acceso: </Text>Llegar a la Plaza de {distrito} y tomar movilidad rural al {caserio}.
         </Text>
       </View>
     </View>
