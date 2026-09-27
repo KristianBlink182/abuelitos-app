@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "pe.abuelitos.app",
-      "buildNumber": "56"
+      "buildNumber": "57"
     },
     "android": {
       "adaptiveIcon": {
