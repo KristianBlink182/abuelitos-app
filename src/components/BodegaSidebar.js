@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Platform, Linking } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { getSaldoAbuelito } from '../services/api';
 import DonationReportModal from './DonationReportModal';
@@ -31,13 +31,18 @@ export default function BodegaSidebar({ abuelito, usuarioDonante, onOpenAuth }) 
     }
   };
 
-  const numeroYape = abuelito.bodega_yape || '984765432';
-  const cuentaBanco = abuelito.bodega_cuenta || '04-012-456789';
-  const nombreBanco = abuelito.bodega_banco || 'Banco de la Nación';
-
   const handleAbrirDonacion = () => {
-    if (!usuarioDonante) onOpenAuth();
-    else setModalDonacion(true);
+    if (Platform.OS === 'web') {
+      // En la Web: Comportamiento original intacto con modal
+      if (!usuarioDonante) {
+        if (onOpenAuth) onOpenAuth();
+      } else {
+        setModalDonacion(true);
+      }
+    } else {
+      // En la App de iOS: Cumple la Alternativa #1 de Apple abriendo Safari
+      Linking.openURL('https://abuelitos.pe');
+    }
   };
 
   return (
@@ -47,83 +52,91 @@ export default function BodegaSidebar({ abuelito, usuarioDonante, onOpenAuth }) 
       {/* 1. SALDO EN VÍVERES */}
       <View style={[styles.saldoBox, saldoInfo.saldo_disponible === 0 && styles.saldoBoxUrgente]}>
         <Text style={[styles.saldoLabel, saldoInfo.saldo_disponible === 0 && { color: '#991B1B' }]}>
-          {saldoInfo.saldo_disponible === 0 ? '🚨 Sin Saldo en Alimentos' : '🛒 Saldo en Víveres Disponible:'}
+          {saldoInfo.saldo_disponible === 0 ? '🚨 SIN SALDO EN ALIMENTOS' : '🛒 Saldo en Víveres Disponible:'}
         </Text>
         <Text style={[styles.saldoMonto, saldoInfo.saldo_disponible === 0 && { color: '#DC2626' }]}>
           S/ {parseFloat(saldoInfo.saldo_disponible || 0).toFixed(2)}
         </Text>
-        <Text style={styles.saldoSub}>Total recaudado: S/ {parseFloat(saldoInfo.total_donado || 0).toFixed(2)}</Text>
+        <Text style={styles.saldoSub}>Meta mensual: S/ 500.00</Text>
       </View>
 
-      {/* 2. DATOS DE LA BODEGA */}
-      <Text style={styles.bodegaCardTitle}>🏪 Bodega Solidaria Aliada</Text>
-      <Text style={styles.bodegaSub}>Despacho de víveres a precio fijado en:</Text>
-      
-      <View style={styles.bodegaInfoRow}>
-        <Text style={styles.bodegaLabel}>Comercio:</Text>
-        <Text style={styles.bodegaValue}>{abuelito.bodega_nombre || 'Bodega Comunal'}</Text>
-      </View>
-      <View style={styles.bodegaInfoRow}>
-        <Text style={styles.bodegaLabel}>Encargado(a):</Text>
-        <Text style={styles.bodegaValue}>{abuelito.bodega_dueno || 'Comerciante Asignado'}</Text>
-      </View>
-      <View style={styles.bodegaInfoRow}>
-        <Text style={styles.bodegaLabel}>Dirección:</Text>
-        <Text style={styles.bodegaValue}>{abuelito.bodega_direccion || abuelito.caserio}</Text>
-      </View>
-
-      {/* 3. MÓDULO DE PAGO DIRECTO */}
+      {/* 2. CANALES OFICIALES DE AYUDA (RUSBELT) */}
       <View style={styles.paymentBox}>
-        <Text style={styles.paymentHead}>💳 Envío directo de donación:</Text>
-        
-        {/* BOTÓN MORADO DE YAPE/PLIN TOCABLE DIRECTAMENTE PARA COPIAR */}
+        <Text style={styles.sectionHeaderTitle}>💳 Canales Oficiales de Ayuda</Text>
+        <Text style={styles.sectionHeaderSub}>👤 Titular: <Text style={{ fontWeight: 'bold' }}>Rusbelt Ronal Malvas Sánchez</Text></Text>
+
+        {/* BOTÓN MORADO DE YAPE / PLIN */}
         <TouchableOpacity 
-          style={styles.yapeBannerClickable} 
-          onPress={() => copiarTexto(numeroYape, 'Número Yape')}
+          style={styles.yapeBannerClickable}
+          onPress={() => copiarTexto('966489563', 'Número Yape')}
           activeOpacity={0.8}
         >
-          <Text style={styles.yapeText}>Yape / Plin (Toca para copiar número):</Text>
-          <Text style={styles.yapeNumber}>{numeroYape} 📋</Text>
+          <Text style={styles.yapeText}>📱 Yape / Plin (Toca para copiar):</Text>
+          <Text style={styles.yapeNumber}>966 489 563 📋</Text>
         </TouchableOpacity>
 
         {/* QR DESPLEGABLE */}
         <TouchableOpacity style={styles.btnToggleQR} onPress={() => setMostrarQR(!mostrarQR)}>
-          <Text style={styles.btnToggleQRText}>{mostrarQR ? '▲ Ocultar Código QR' : '📲 Ver Código QR para Escanear'}</Text>
+          <Text style={styles.btnToggleQRText}>{mostrarQR ? '▲ Ocultar Código QR' : '📲 Ver Código QR Oficial de Yape'}</Text>
         </TouchableOpacity>
 
         {mostrarQR && (
           <View style={styles.qrWrapper}>
-            <QRCode value={`https://yape.pe/p/${numeroYape}`} size={140} color="#74226C" backgroundColor="#FFF" />
+            <QRCode value="https://qr.yape.pe/p/966489563" size={140} color="#74226C" backgroundColor="#FFF" />
             <Text style={styles.qrTip}>Apunta tu celular con Yape o Plin</Text>
           </View>
         )}
 
-        {/* BOTÓN REGISTRAR DONACIÓN */}
-        <TouchableOpacity style={styles.btnReportar} onPress={handleAbrirDonacion} activeOpacity={0.85}>
-          <Text style={styles.btnReportarText}>✨ Ya hice mi donación (Sumar Saldo)</Text>
-        </TouchableOpacity>
-
-        {/* TARJETA DEL BANCO DE LA NACIÓN */}
+        {/* BCP CLÁSICA SOLES */}
         <TouchableOpacity 
-          style={styles.bankCardBox} 
-          onPress={() => copiarTexto(cuentaBanco, 'Número de cuenta')}
+          style={styles.bankCardBox}
+          onPress={() => copiarTexto('19394316326014', 'Cuenta BCP')}
           activeOpacity={0.8}
         >
-          <Text style={styles.bankName}>🏦 {nombreBanco}:</Text>
-          <Text style={styles.bankAccount}>{cuentaBanco} 📋</Text>
-          <Text style={styles.bankTip}>Toca para copiar número de cuenta</Text>
+          <Text style={styles.bankName}>🔵 BCP Clásica Soles</Text>
+          <Text style={styles.bankAccount}>N° Cuenta: <Text style={{ fontWeight: 'bold' }}>19394316326014 📋</Text></Text>
+          <Text style={styles.bankTip}>CCI: 00219319431632601414 📋</Text>
+        </TouchableOpacity>
+
+        {/* INTERBANK SIMPLE SOLES */}
+        <TouchableOpacity 
+          style={styles.bankCardBox}
+          onPress={() => copiarTexto('048-3215434187', 'Cuenta Interbank')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.bankName}>🟢 Interbank Simple Soles</Text>
+          <Text style={styles.bankAccount}>N° Cuenta: <Text style={{ fontWeight: 'bold' }}>048-3215434187 📋</Text></Text>
+          <Text style={styles.bankTip}>CCI: 003-048-013215434187-60 📋</Text>
+        </TouchableOpacity>
+
+        {/* PAYPAL */}
+        <TouchableOpacity 
+          style={styles.bankCardBox}
+          onPress={() => Linking.openURL('https://www.paypal.com')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.bankName}>🌐 PayPal (Donaciones del Extranjero)</Text>
+          <Text style={styles.bankTip}>rusbeltms@gmail.com ↗</Text>
+        </TouchableOpacity>
+
+        {/* BOTÓN REGISTRAR DONACIÓN */}
+        <TouchableOpacity style={styles.btnReportar} onPress={handleAbrirDonacion} activeOpacity={0.85}>
+          <Text style={styles.btnReportarText}>
+            {Platform.OS === 'web' ? '✨ Ya hice mi donación (Notificar)' : '✨ Ya hice mi donación (Notificar en abuelitos.pe)'}
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* 4. PADRINOS Y DONANTES ACTIVOS */}
+      {/* 3. PADRINOS Y DONANTES ACTIVOS */}
       <View style={{ marginTop: 16 }}>
         <DonorAvatarsRow abuelitoId={abuelito.id} abuelitoNombre={abuelito.nombre_completo} />
       </View>
 
-      <DonationReportModal 
-        visible={modalDonacion} 
-        onClose={() => setModalDonacion(false)} 
+      <DonationReportModal
+        visible={modalDonacion}
+        onClose={() => setModalDonacion(false)}
         abuelito={abuelito}
+        usuarioDonante={usuarioDonante}
         onDonationSuccess={cargarSaldo}
       />
     </View>
@@ -131,30 +144,26 @@ export default function BodegaSidebar({ abuelito, usuarioDonante, onOpenAuth }) 
 }
 
 const styles = StyleSheet.create({
-  bodegaCard: { backgroundColor: '#FFFDFB', padding: 18, borderRadius: 16, borderWidth: 1.5, borderColor: '#FDE68A', shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
+  bodegaCard: { backgroundColor: '#FFFFFF', padding: 18, borderRadius: 16, borderWidth: 1.5, borderColor: '#FDE68A', shadowOpacity: 0.05, shadowRadius: 10, elevation: 3 },
   saldoBox: { backgroundColor: '#F0FDF4', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#BBF7D0', marginBottom: 14, alignItems: 'center' },
   saldoBoxUrgente: { backgroundColor: '#FEF2F2', borderColor: '#FECACA' },
   saldoLabel: { fontSize: 10, fontWeight: 'bold', color: '#166534', textTransform: 'uppercase' },
   saldoMonto: { fontSize: 24, fontWeight: '900', color: '#15803D', marginVertical: 1 },
   saldoSub: { fontSize: 10, color: '#64748B' },
-  bodegaCardTitle: { fontSize: 16, fontWeight: 'bold', color: '#1A202C', marginBottom: 2 },
-  bodegaSub: { fontSize: 11, color: '#718096', marginBottom: 10 },
-  bodegaInfoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
-  bodegaLabel: { fontSize: 12, color: '#718096', fontWeight: '600' },
-  bodegaValue: { fontSize: 12, color: '#2D3748', fontWeight: 'bold' },
-  paymentBox: { backgroundColor: '#FFF5F5', padding: 12, borderRadius: 12, marginTop: 10, borderWidth: 1, borderColor: '#FED7D7' },
-  paymentHead: { fontSize: 11, fontWeight: 'bold', color: '#C53030', marginBottom: 6 },
-  yapeBannerClickable: { backgroundColor: '#74226C', padding: 10, borderRadius: 10, alignItems: 'center', marginBottom: 8, cursor: 'pointer' },
-  yapeText: { color: '#E9D8FD', fontSize: 10, fontWeight: 'bold' },
-  yapeNumber: { color: '#FFF', fontSize: 18, fontWeight: '900', letterSpacing: 0.5, marginTop: 1 },
+  paymentBox: { backgroundColor: '#FFFDF5', padding: 12, borderRadius: 12, marginTop: 4, borderWidth: 1, borderColor: '#FED7D7' },
+  sectionHeaderTitle: { fontSize: 13, fontWeight: 'bold', color: '#1E293B', marginBottom: 2 },
+  sectionHeaderSub: { fontSize: 11, color: '#64748B', marginBottom: 10 },
+  yapeBannerClickable: { backgroundColor: '#74226C', padding: 10, borderRadius: 10, alignItems: 'center', marginBottom: 8 },
+  yapeText: { color: '#FFD700', fontSize: 10, fontWeight: 'bold' },
+  yapeNumber: { color: '#FFF', fontSize: 18, fontWeight: '900', letterSpacing: 0.5 },
   btnToggleQR: { backgroundColor: '#FFF', borderWidth: 1, borderColor: '#74226C', paddingVertical: 6, borderRadius: 6, alignItems: 'center', marginBottom: 8 },
   btnToggleQRText: { color: '#74226C', fontWeight: 'bold', fontSize: 11 },
   qrWrapper: { backgroundColor: '#FFF', padding: 10, borderRadius: 10, alignItems: 'center', marginVertical: 6, borderWidth: 1, borderColor: '#E2E8F0' },
-  qrTip: { fontSize: 10, color: '#64748B', marginTop: 6, fontWeight: '600' },
-  btnReportar: { backgroundColor: '#16A34A', paddingVertical: 10, borderRadius: 8, alignItems: 'center', marginBottom: 8 },
-  btnReportarText: { color: '#FFF', fontWeight: '900', fontSize: 12 },
-  bankCardBox: { backgroundColor: '#FFF', padding: 8, borderRadius: 8, borderWidth: 1, borderColor: '#E2E8F0', alignItems: 'center', cursor: 'pointer' },
+  qrTip: { fontSize: 10, color: '#64748B', marginTop: 4 },
+  bankCardBox: { backgroundColor: '#FFF', padding: 8, borderRadius: 8, borderWidth: 1, borderColor: '#E2E8F0', marginBottom: 6 },
   bankName: { fontSize: 11, fontWeight: 'bold', color: '#1E293B' },
-  bankAccount: { fontSize: 13, fontWeight: '900', color: '#2563EB', marginVertical: 1 },
-  bankTip: { fontSize: 9, color: '#64748B', fontStyle: 'italic' }
+  bankAccount: { fontSize: 11, color: '#2563EB', marginVertical: 1 },
+  bankTip: { fontSize: 9, color: '#64748B' },
+  btnReportar: { backgroundColor: '#16A34A', paddingVertical: 10, borderRadius: 8, alignItems: 'center', marginTop: 6 },
+  btnReportarText: { color: '#FFF', fontWeight: '900', fontSize: 12 }
 });

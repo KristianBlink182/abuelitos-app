@@ -2,16 +2,17 @@ import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 
 export default function GallerySection({ abuelito = {}, onFotoClick, onVideoClick }) {
-  const fotosReales = [
-    abuelito.foto_vivienda_1,
-    abuelito.foto_vivienda_2,
-    abuelito.foto_vivienda_3
-  ].filter(Boolean);
+  const formatearUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `https://abuelitos.pe${url.startsWith('/') ? '' : '/'}${url}`;
+  };
 
-  const fotosFallback = [
-    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=600',
-    'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=600'
-  ];
+  const fotosReales = [
+    formatearUrl(abuelito.foto_vivienda_1),
+    formatearUrl(abuelito.foto_vivienda_2),
+    formatearUrl(abuelito.foto_vivienda_3)
+  ].filter(Boolean);
 
   const imagenesAMostrar = fotosReales.length > 0 ? fotosReales : fotosFallback;
   const tieneVideo = Boolean(abuelito.video_url);
@@ -30,7 +31,7 @@ export default function GallerySection({ abuelito = {}, onFotoClick, onVideoClic
             onPress={() => onVideoClick && onVideoClick(abuelito.video_url)}
             activeOpacity={0.85}
           >
-            <Image source={{ uri: abuelito.foto_url }} style={styles.galleryImg} />
+           <Image source={{ uri: formatearUrl(abuelito.foto_url) }} style={styles.galleryImg} />
             <View style={styles.videoOverlay}>
               <View style={styles.playPulseCircle}>
                 <Text style={styles.playIcon}>▶</Text>
