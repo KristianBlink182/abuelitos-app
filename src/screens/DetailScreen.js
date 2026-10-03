@@ -22,6 +22,12 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
   const [fotoZoomUrl, setFotoZoomUrl] = useState(null);
   const [esFavorito, setEsFavorito] = useState(false);
 
+  const formatearFoto = (url) => {
+    if (!url) return null;
+    let urlFinal = url.startsWith('http') ? url : `https://abuelitos.pe${url.startsWith('/') ? '' : '/'}${url}`;
+    return encodeURI(urlFinal);
+  };
+
   const handleAbrirVideo = (url) => {
     setVideoUrlActual(url || abuelito.video_url);
     setVideoPlayerOpen(true);
@@ -74,7 +80,7 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
             }}
           />
         ) : (
-          <Image source={{ uri: abuelito.foto_url }} style={styles.detailBannerImage} />
+          <Image source={{ uri: formatearFoto(abuelito.foto_url) }} style={styles.detailBannerImage} />
         )}
 
         <View style={styles.bannerOverlay} />
@@ -93,7 +99,7 @@ export default function DetailScreen({ abuelito, onBack, onEdit, usuarioDonante,
         
         <View style={[styles.detailHeaderInfo, esMovil && styles.detailHeaderInfoMovil]}>
           <TouchableOpacity onPress={() => setFotoZoomUrl(abuelito.foto_url)} activeOpacity={0.8}>
-            <Image source={{ uri: abuelito.foto_url }} style={[styles.avatarImg, esMovil && styles.avatarImgMovil]} />
+            <Image source={{ uri: formatearFoto(abuelito.foto_url) }} style={[styles.avatarImg, esMovil && styles.avatarImgMovil]} />
             <View style={styles.badgeZoom}><Text style={styles.badgeZoomText}>🔍 Ampliar</Text></View>
           </TouchableOpacity>
 

@@ -164,6 +164,13 @@ const styles = StyleSheet.create({
   bankName: { fontSize: 11, fontWeight: 'bold', color: '#1E293B' },
   bankAccount: { fontSize: 11, color: '#2563EB', marginVertical: 1 },
   bankTip: { fontSize: 9, color: '#64748B' },
-  btnReportar: { backgroundColor: '#16A34A', paddingVertical: 10, borderRadius: 8, alignItems: 'center', marginTop: 6 },
+  btnReportar: { 
+    backgroundColor: '#16A34A', 
+    paddingVertical: 12, 
+    borderRadius: 8, 
+    alignItems: 'center', 
+    marginTop: 10,
+    marginBottom: 6 // <--- ¡Esto evita que pise la caja de abajo!
+  },
   btnReportarText: { color: '#FFF', fontWeight: '900', fontSize: 12 }
 });

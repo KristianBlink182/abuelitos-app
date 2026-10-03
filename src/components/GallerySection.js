@@ -4,8 +4,8 @@ import { StyleSheet, View, Text, Image, TouchableOpacity } from 'react-native';
 export default function GallerySection({ abuelito = {}, onFotoClick, onVideoClick }) {
   const formatearUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith('http')) return url;
-    return `https://abuelitos.pe${url.startsWith('/') ? '' : '/'}${url}`;
+    let urlFinal = url.startsWith('http') ? url : `https://abuelitos.pe${url.startsWith('/') ? '' : '/'}${url}`;
+    return encodeURI(urlFinal);
   };
 
   const fotosReales = [
